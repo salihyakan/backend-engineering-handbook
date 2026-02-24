@@ -4,265 +4,138 @@ Bu bölümde şunları öğreneceksin:
 
 - Django architecture
 - MTV pattern
-- Django project structure
-- Django app structure
-- settings.py
+- Django project vs app mantığı
+- Django project & app structure
+- settings.py detaylı yapı
+- .env yönetimi
+- Static & Media config
+- Custom user model
+- Migration sistemi
+- Yönetim komutları
+- Signals, middleware, context processors
+- Production / Development ayrımı
 
-Bu konular Django’nun **iskeleti**dir.
+Bu bölüm Django’nun **iskeletini** ve production’da nasıl doğru kurulduğunu öğretir.
 
 ---
 
 # 1️⃣ Django Architecture (Django Mimarisi)
 
-## Django nedir?
+## Django Nedir?
 
-Django, Python ile yazılmış bir web framework’tür.
+Django, Python ile yazılmış high-level bir web framework’tür.
 
-### Amaç
+Amaçları:
 
-- Web uygulamalarını hızlı geliştirmek
-- Güvenli yapmak
-- Maintainable (bakımı kolay) yapmak
-- DRY prensibini uygulamak
-
----
-
-## Django Request Lifecycle (İstek Yaşam Döngüsü)
-
-Bir kullanıcı siteye girince ne olur?
-
-### Genel Akış
-
-Browser → URL → Django → View → Model → Database → View → Template → Response → Browser
+- Hızlı geliştirme
+- Güvenli uygulama
+- DRY prensibi
+- Maintainable yapı
 
 ---
 
-## Detaylı Akış
+## Django Request Lifecycle
 
-### 1️⃣ Kullanıcı istek gönderir
+Akış:
 
-    GET /products/
-
-### 2️⃣ Django URL’i yakalar
-
-    # urls.py
-    urlpatterns = [
-        path("products/", product_list_view)
-    ]
-
-### 3️⃣ Django ilgili view’ı çağırır
-
-    def product_list_view(request):
-        products = Product.objects.all()
-        return render(request, "products.html", {"products": products})
-
-### 4️⃣ View → Model ile konuşur
-
-    Product.objects.all()
-
-### 5️⃣ Database’ten veri gelir
-
-### 6️⃣ Template render edilir (products.html)
-
-### 7️⃣ HTML response kullanıcıya döner
-
-Bu akış Django’nun temel mimarisidir.
+Browser  
+↓  
+URL  
+↓  
+View  
+↓  
+Model  
+↓  
+Database  
+↓  
+Template  
+↓  
+Response  
 
 ---
 
-# 2️⃣ MTV Pattern (Model Template View)
+# 2️⃣ MTV Pattern
 
-Django klasik MVC kullanmaz. Onun yerine MTV kullanır.
+Django MVC kullanmaz, MTV kullanır.
 
-## MTV Bileşenleri
+## MTV
 
-- Model
-- Template
-- View
-
----
-
-## MVC vs MTV
-
-### MVC
-
-- Model → data
-- View → UI
-- Controller → logic
-
-### Django MTV
-
-- Model → data
+- Model → Data
 - Template → UI
-- View → logic
+- View → Logic
 
-### Önemli
+### Kritik Nokta
 
 - Django View = MVC Controller
 - Django Template = MVC View
 
 ---
 
-## MTV Diyagramı
+# 3️⃣ Django Project Structure
 
-User  
-↓  
-URL  
-↓  
-View  ← business logic  
-↓  
-Model ← database access  
-↓  
-Template ← HTML render  
-↓  
-Response  
-
----
-
-# 3️⃣ Model (Veri Katmanı)
-
-Database’i temsil eder.
-
-    class Product(models.Model):
-        name = models.CharField(max_length=255)
-        price = models.FloatField()
-
-Bu bir database tablosuna karşılık gelir:
-
-    product table
-
-    id | name | price
-
----
-
-# 4️⃣ View (Logic Katmanı)
-
-Request alır, logic çalıştırır ve response döner.
-
-    def product_list(request):
-        products = Product.objects.all()
-        return render(request, "products.html", {"products": products})
-
----
-
-# 5️⃣ Template (UI Katmanı)
-
-HTML render eder.
-
-    {% for product in products %}
-      <p>{{ product.name }}</p>
-    {% endfor %}
-
----
-
-# 6️⃣ Django Project Structure
-
-Komut:
-
-    django-admin startproject config
-
-## Oluşan Yapı
-
+```
+config/
+    manage.py
     config/
-        manage.py
-        config/
-            __init__.py
-            settings.py
-            urls.py
-            asgi.py
-            wsgi.py
-
----
+        __init__.py
+        settings.py
+        urls.py
+        asgi.py
+        wsgi.py
+```
 
 ## manage.py
 
-Ana kontrol dosyasıdır.
+Komut çalıştırma aracıdır.
 
-Komutlar:
-
-    python manage.py runserver
-    python manage.py migrate
-    python manage.py createsuperuser
-
----
-
-## urls.py
-
-Routing tanımları:
-
-    urlpatterns = [
-        path("admin/", admin.site.urls),
-    ]
+```
+python manage.py runserver
+python manage.py migrate
+python manage.py createsuperuser
+```
 
 ---
 
 ## wsgi.py
 
-Production server için kullanılır.
+Production WSGI server için kullanılır.
 
-WSGI = Web Server Gateway Interface  
-Gunicorn bunu kullanır.
+Genellikle:
+- Gunicorn
 
 ---
 
 ## asgi.py
 
-Async server için kullanılır.
+Async server için.
 
-ASGI = Asynchronous Server Gateway Interface  
-Uvicorn bunu kullanır.
+Genellikle:
+- Uvicorn
 
 ---
 
-# 7️⃣ Django App Structure
+# 4️⃣ Django App Structure
 
-Django project birden fazla app içerir.
+App = Feature modülü
 
-Örnek:
-
-    config/
-    products/
-    users/
-    orders/
+```
+products/
+    models.py
+    views.py
+    admin.py
+    apps.py
+    migrations/
+```
 
 App oluşturma:
 
-    python manage.py startapp products
-
-## App Yapısı
-
-    products/
-        __init__.py
-        admin.py
-        apps.py
-        models.py
-        views.py
-        tests.py
-        migrations/
-
-### models.py
-
-    class Product(models.Model):
-        name = models.CharField(max_length=255)
-
-### views.py
-
-    def product_list(request):
-        pass
-
-### admin.py
-
-    admin.site.register(Product)
-
-### migrations/
-
-Database migration dosyaları.
+```
+python manage.py startapp products
+```
 
 ---
 
-# 8️⃣ Django Project vs App
-
-Çok kritik fark.
+# 5️⃣ Django Project vs App (Paketleme & Reusable App)
 
 ## Project
 
@@ -272,177 +145,374 @@ Tüm sistemdir.
 
 Tek bir feature modülüdür.
 
+### Reusable App Mantığı
+
+Bir app başka projeye taşınabiliyorsa reusable’dır.
+
 Örnek:
 
-Project: ecommerce
+- blog app
+- comment app
+- notification app
 
-Apps:
+Reusable app:
 
-- users
-- products
-- orders
-- payments
+- Kendi models.py
+- Kendi templates/
+- Kendi static/
+- Kendi urls.py
 
-Bu yapı clean architecture yaklaşımıdır.
+Bu yaklaşım büyük projelerde modülerlik sağlar.
 
 ---
 
-# 9️⃣ settings.py (En Kritik Dosya)
+# 6️⃣ settings.py (En Kritik Dosya)
 
-Django’nun kalbidir. Tüm config burada yapılır.
+Django’nun kalbidir.
 
-## INSTALLED_APPS
+---
 
-    INSTALLED_APPS = [
-        'django.contrib.admin',
-        'products',
-        'users',
+## BASE_DIR
+
+```python
+from pathlib import Path
+BASE_DIR = Path(__file__).resolve().parent.parent
+```
+
+Tüm path işlemleri BASE_DIR üzerinden yapılmalıdır.
+
+---
+
+## SECRET_KEY Güvenliği
+
+❌ Yanlış:
+
+```python
+SECRET_KEY = "hardcoded-secret"
+```
+
+✅ Doğru: .env kullanmak
+
+---
+
+# 7️⃣ .env / Çevresel Değişken Yönetimi
+
+Production’da config kod içinde tutulmaz.
+
+Kullanılabilecek paketler:
+
+- django-environ
+- python-decouple
+
+Örnek (python-decouple):
+
+```
+pip install python-decouple
+```
+
+.env dosyası:
+
+```
+SECRET_KEY=super-secret
+DEBUG=False
+DATABASE_URL=postgres://user:pass@localhost:5432/db
+```
+
+settings.py:
+
+```python
+from decouple import config
+
+SECRET_KEY = config("SECRET_KEY")
+DEBUG = config("DEBUG", default=False, cast=bool)
+```
+
+Bu yaklaşım:
+
+✔ Güvenli  
+✔ Production uyumlu  
+✔ 12-factor app prensibine uygun  
+
+---
+
+# 8️⃣ INSTALLED_APPS (Dev / Production Ayrımı)
+
+Geliştirme araçları production’da olmamalı.
+
+```python
+INSTALLED_APPS = [
+    "django.contrib.admin",
+    "products",
+]
+
+if DEBUG:
+    INSTALLED_APPS += [
+        "debug_toolbar",
     ]
+```
 
-## DATABASES
+Örnek dev tool:
 
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'mydb',
-            'USER': 'user',
-            'PASSWORD': 'pass',
+- django-debug-toolbar
+
+Production ortamda dev tool çalıştırılmaz.
+
+---
+
+# 9️⃣ Static & Media Konfigürasyonu
+
+## STATIC (CSS, JS, Images)
+
+```python
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_DIRS = [BASE_DIR / "static"]
+```
+
+Production’da:
+
+```
+python manage.py collectstatic
+```
+
+collectstatic:
+
+- Tüm static dosyaları
+- STATIC_ROOT içine toplar
+
+Web server (nginx) buradan servis eder.
+
+---
+
+## MEDIA (User Upload)
+
+```python
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+```
+
+User upload edilen dosyalar buraya kaydedilir.
+
+Production’da genellikle:
+
+- S3
+- Cloud storage
+
+kullanılır.
+
+---
+
+# 🔟 Custom User Model (Çok Kritik)
+
+Django default User model kullanmak ileride sorun çıkarabilir.
+
+Doğru yaklaşım:
+
+Projeye başlarken custom user oluşturmak.
+
+```python
+from django.contrib.auth.models import AbstractUser
+
+class User(AbstractUser):
+    phone = models.CharField(max_length=20, blank=True)
+```
+
+settings.py:
+
+```python
+AUTH_USER_MODEL = "users.User"
+```
+
+⚠ Bu işlem migration’dan önce yapılmalıdır.
+
+Sonradan değiştirmek zordur.
+
+---
+
+# 1️⃣1️⃣ Migration Sistemi (Arka Planı)
+
+## makemigrations
+
+Model değişimini algılar.
+
+Migration dosyası üretir.
+
+```
+python manage.py makemigrations
+```
+
+Bu dosya:
+
+- SQL karşılığı içerir
+- Schema değişimini temsil eder
+
+---
+
+## migrate
+
+Migration’ı database’e uygular.
+
+```
+python manage.py migrate
+```
+
+Arka planda:
+
+- SQL generate edilir
+- DB schema update edilir
+
+Migration dosyaları version control’e eklenmelidir.
+
+---
+
+# 1️⃣2️⃣ Yönetim Komutları
+
+## startapp
+
+Yeni app oluşturur.
+
+## makemigrations
+
+Model değişikliklerini yakalar.
+
+## migrate
+
+Database’e uygular.
+
+## createsuperuser
+
+Admin kullanıcı oluşturur.
+
+## loaddata
+
+Fixture yükler:
+
+```
+python manage.py loaddata initial_data.json
+```
+
+---
+
+# 1️⃣3️⃣ Middleware
+
+Request & response arasında çalışan katmandır.
+
+```python
+MIDDLEWARE = [
+    "django.middleware.security.SecurityMiddleware",
+]
+```
+
+Middleware:
+
+- Authentication kontrol eder
+- Security header ekler
+- Logging yapabilir
+
+Request akışı:
+
+Request → Middleware → View → Middleware → Response
+
+---
+
+# 1️⃣4️⃣ Signals
+
+Model olaylarını dinler.
+
+Örnek:
+
+```python
+@receiver(post_save, sender=User)
+def create_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+```
+
+Signals:
+
+- post_save
+- pre_save
+- post_delete
+
+Business logic’i modelden ayırmak için kullanılır.
+
+---
+
+# 1️⃣5️⃣ Context Processors
+
+Template’e global değişken ekler.
+
+settings.py:
+
+```python
+TEMPLATES = [
+    {
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.request",
+            ]
         }
     }
+]
+```
 
-## DEBUG
+Örnek kullanım:
 
-    DEBUG = True
-
-Production:
-
-    DEBUG = False
-
-## ALLOWED_HOSTS
-
-    ALLOWED_HOSTS = ["example.com"]
-
-## MIDDLEWARE
-
-    MIDDLEWARE = [
-        'django.middleware.security.SecurityMiddleware',
-    ]
-
-## TEMPLATES
-
-Template configuration burada yapılır.
-
-## STATIC_URL
-
-Static dosyalar:
-
-- css
-- js
-- images
+- Site adı
+- Global ayarlar
+- Cart item count
 
 ---
 
-# 1️⃣0️⃣ Django Nasıl Çalışır (Production Flow)
+# 1️⃣6️⃣ Production Flow
 
-Gerçek production akışı:
+Gerçek akış:
 
-User → nginx → gunicorn → Django → urls.py → view → model → db → view → template → response
-
----
-
-# 1️⃣1️⃣ Gerçek Proje Örneği
-
-    ecommerce/
-        manage.py
-
-        config/
-            settings.py
-            urls.py
-
-        products/
-            models.py
-            views.py
-
-        users/
-            models.py
+User  
+↓  
+nginx  
+↓  
+gunicorn  
+↓  
+Django  
+↓  
+urls.py  
+↓  
+view  
+↓  
+model  
+↓  
+database  
+↓  
+response  
 
 ---
 
-# 1️⃣2️⃣ Django’nun Avantajları
+# 1️⃣7️⃣ Django Built-in Güçlü Özellikler
 
-- Built-in admin panel
+- Admin panel
 - ORM
-- Authentication
-- Security
-- Scalability
+- Auth sistemi
+- Middleware
+- Migration sistemi
+- Template engine
 
 ---
 
-# 1️⃣3️⃣ Django’nun Built-in Özellikleri
+# Özet
 
-- auth system
-- ORM
-- admin panel
-- middleware
-- migrations
-- template engine
+Bu bölümden sonra biliyorsun:
 
----
+✔ Django MTV mimarisi  
+✔ Project vs App farkı  
+✔ Reusable app mantığı  
+✔ settings.py production düzeni  
+✔ .env yönetimi  
+✔ Static & media config  
+✔ Custom user model  
+✔ Migration sistemi  
+✔ Middleware, signals, context processors  
+✔ Dev vs Production ayrımı  
 
-# Özet (Mülakat İçin Kritik)
-
-## Django Architecture
-
-MTV pattern kullanır.
-
-- Model → data layer
-- View → business logic
-- Template → presentation layer
-
-## Project
-
-Tüm sistem.
-
-## App
-
-Feature modülüdür.
-
-## settings.py
-
-Django’nun config merkezidir.
-
-## Request Flow
-
-URL → View → Model → Template → Response
-
----
-
-# Mülakat Soruları
-
-## Soru
-
-Django MVC mi kullanır?
-
-## Cevap
-
-Hayır, MTV kullanır.
-
----
-
-## Soru
-
-Project ve app farkı nedir?
-
-## Cevap
-
-Project tüm sistemdir, app feature modülüdür.
-
----
-
-## Soru
-
-settings.py ne işe yarar?
-
-## Cevap
-
-Django’nun tüm config ayarlarını içerir.
+Bu bilgi seviyesi artık “Django kullanabiliyorum” değil,  
+“Django’yu doğru mimariyle kurabiliyorum” seviyesidir.

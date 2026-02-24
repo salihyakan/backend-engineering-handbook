@@ -1,624 +1,513 @@
-BÖLÜM 1 — PROGRAMLAMANIN TEMELLERİ
-1.1 Temel Programlama Kavramları
+# BÖLÜM — ADVANCED BACKEND CONCEPTS
 
-Programlama nedir
+Bu bölümde production seviyesinde backend sistemlerin nasıl tasarlandığını öğreneceksin.
 
-Compiler vs Interpreter
+İçerik:
 
-Syntax vs Semantic
+- Stateless vs Stateful Architecture  
+- Scalability (Vertical vs Horizontal Scaling)  
+- Load Balancing  
+- Advanced Caching Concepts  
+- Background Jobs & Task Queues  
+- Message Queues & Event-Driven Architecture  
+- Idempotency  
+- Rate Limiting & Throttling  
+- Database Scaling (Replication & Sharding)  
+- Consistency Patterns  
+- Circuit Breaker Pattern  
+- Distributed Systems Fundamentals  
+- Observability (Logging, Monitoring, Tracing)  
+- Graceful Degradation  
+- CAP Theorem  
 
-Runtime vs Compile time
+Bu bölüm seni “backend developer” seviyesinden “production system designer” seviyesine taşır.
 
-Variable nedir
+---
 
-Primitive vs Non-primitive types
+# 1️⃣ Stateless vs Stateful Architecture
 
-Mutable vs Immutable
+Production backend’in en kritik tasarım kararlarından biridir.
 
-Stack vs Heap memory
+## Stateless Nedir?
 
-Reference vs Value
+Server hiçbir client state’ini memory’de saklamaz.  
+Her request bağımsızdır.
 
-Memory allocation temelleri
+Örnek:
 
-Garbage Collection nedir
+```
+GET /api/profile
+Authorization: Bearer xyz123
+```
 
-Memory leak nedir
+Server sadece token’ı doğrular.  
+State:
 
-Time complexity (Big O notation)
+- Database’te
+- Cache’te
+- Token içinde
 
-Space complexity
+tutulur.
 
-Algorithm nedir
+### Avantajları
 
-Data structure nedir
+✔ Horizontal scaling kolay  
+✔ Load balancing sorunsuz  
+✔ Fault tolerant  
+✔ Server restart güvenli  
 
-1.2 Kontrol Akışı
+### Django Stateless Örneği
 
-if else yapısı
+```python
+def get_profile(request):
+    user = request.user
+    return Response(user.username)
+```
 
-nested if
+Server memory’de session map tutmaz.
 
-ternary operator
+---
 
-match case (Python)
+## Stateful Nedir?
 
-for loop
+Server client state’i memory’de tutar.
 
-while loop
+```python
+logged_users = {
+    "session123": user_id
+}
+```
 
-break ve continue
+### Problemleri
 
-pass keyword
+- Server restart → state kaybolur
+- Horizontal scaling zorlaşır
+- Sticky session gerekir
+- Fault tolerance düşer
 
-1.3 Fonksiyonlar
+Modern production sistemler **stateless tasarlanır**.
 
-Function tanımı
+---
 
-Function parameters
+# 2️⃣ Scalability
 
-positional vs keyword arguments
+**Scalability**, sistemin artan yükü kaldırabilme kapasitesidir.
 
-default parameters
+## Vertical Scaling
 
-mutable default parameter problemi
+Server büyütülür:
 
-args ve kwargs
+- 4 CPU → 16 CPU
+- 8GB RAM → 64GB RAM
 
-recursion
+Kolaydır ama limitlidir.
 
-pure function
+---
 
-side effects
+## Horizontal Scaling
 
-first class functions
+Server sayısı artırılır:
 
-BÖLÜM 2 — PYTHON CORE
-2.1 Python Temelleri
+```
+1 server → 10 server
+```
 
-Python interpreter nasıl çalışır
+Production standardıdır.
 
-CPython nedir
+```
+User → Load Balancer → Server1
+                         Server2
+                         Server3
+```
 
-Bytecode nedir
+Cloud-native sistemler horizontal scaling üzerine kuruludur.
 
-Python execution model
+---
 
-Python REPL nedir
+# 3️⃣ Load Balancing
 
-2.2 Python Data Types
+Load balancer = trafik dağıtıcı katman.
 
-int
+1000 request:
 
-float
+- Server1 → 333
+- Server2 → 333
+- Server3 → 334
 
-bool
+Popüler load balancer çözümleri:
 
-str
+- :contentReference[oaicite:0]{index=0}  
+- :contentReference[oaicite:1]{index=1}  
+- Cloud provider load balancer’ları  
 
-list
+Load balancing:
 
-tuple
+- Availability artırır
+- Fault tolerance sağlar
+- Horizontal scaling’i mümkün kılar
 
-set
+---
 
-dict
+# 4️⃣ Advanced Caching Concepts
 
-bytes
+Cache performansın anahtarıdır.
 
-NoneType
+## Cache Türleri
 
-2.3 Python Memory Model
+### 1️⃣ Application Cache
 
-Object identity
+Genellikle :contentReference[oaicite:2]{index=2} kullanılır.
 
-is vs ==
+```python
+cache.set("user:1", user_data)
+```
 
-id() fonksiyonu
+---
 
-reference counting
+### 2️⃣ Database Query Cache
 
-garbage collector
+Sık çalışan query’ler cache edilir.
 
-small integer caching
+---
 
-string interning
+### 3️⃣ CDN Cache
 
-2.4 Python Collections Internal
+Static içerikler CDN üzerinden servis edilir.
 
-list internal yapısı
+---
 
-dict internal yapısı (hash table)
+## Cache Pattern — Cache Aside
 
-set internal yapısı
+En yaygın yöntem:
 
-tuple internal yapısı
+```python
+def get_user(user_id):
+    user = cache.get(user_id)
 
-2.5 Python Advanced Functions
+    if not user:
+        user = db.get(user_id)
+        cache.set(user_id, user)
 
-lambda functions
+    return user
+```
 
-map
+Akış:
 
-filter
+Cache → Miss → DB → Cache’e yaz → Return
 
-reduce
+---
 
-list comprehension
+# 5️⃣ Background Jobs & Task Queues
 
-dict comprehension
+Uzun süren işlemler async yapılmalıdır.
 
-set comprehension
+Örnek:
 
-generator expression
+- Email gönderme
+- PDF üretme
+- Image processing
 
-2.6 Generator & Iterator
+## ❌ Yanlış
 
-iterator protocol
+```python
+def register():
+    send_email()  # blocking
+```
 
-iter()
+## ✅ Doğru
 
-next()
+```python
+def register():
+    send_email_task.delay()
+```
 
-generator nedir
+Kullanılan araçlar:
 
-yield keyword
+- :contentReference[oaicite:3]{index=3}  
+- :contentReference[oaicite:4]{index=4}  
+- :contentReference[oaicite:5]{index=5}  
 
-lazy evaluation
+---
 
-generator vs list memory farkı
+# 6️⃣ Message Queue & Event-Driven Architecture
 
-2.7 Decorators
+Message queue servisler arası async iletişim sağlar.
 
-decorator nedir
+```
+Order Service → Queue → Email Service
+```
 
-function decorator
+Queue olmadan:
 
-class decorator
+Order service email’i bekler.
 
-decorator chaining
+Queue ile:
 
-functools.wraps
+Order hemen tamamlanır.
 
-2.8 Closures
+Popüler sistemler:
 
-closure nedir
+- :contentReference[oaicite:6]{index=6}  
+- :contentReference[oaicite:7]{index=7}  
+- :contentReference[oaicite:8]{index=8}  
 
-lexical scoping
+---
 
-nonlocal keyword
+# 7️⃣ Idempotency
 
-2.9 Error Handling
+Idempotent = aynı request tekrar edilirse sonuç değişmez.
 
-try except
+Ödeme API örneği:
 
-finally
+## ❌ Yanlış
 
-custom exception
+```
+POST /pay
+```
 
-exception hierarchy
+İki kez çağrılır → 2 ödeme oluşur.
 
-2.10 Modules & Packages
+## ✅ Doğru
 
-module nedir
+```
+POST /pay
+Idempotency-Key: abc123
+```
 
-package nedir
+Server:
 
-init.py
+- Key’i kontrol eder
+- Aynı işlemi tekrar etmez
 
-import sistemi
+Fintech sistemlerde zorunludur.
 
-sys.path
+---
 
-circular import problemi
+# 8️⃣ Rate Limiting & Throttling
 
-BÖLÜM 3 — OBJECT ORIENTED PROGRAMMING (OOP)
-3.1 OOP Temelleri
+Amaç:
 
-class nedir
+- Abuse önlemek
+- DDoS riskini azaltmak
+- Fair usage sağlamak
 
-object nedir
+Örnek:
 
-attribute nedir
+Max 100 request / minute
 
-method nedir
+```python
+count = redis.get(ip)
 
-constructor (init)
+if count > 100:
+    return 429
+```
 
-self keyword
+Genellikle Redis tabanlı sayaç kullanılır.
 
-3.2 OOP Concepts
+---
 
-encapsulation
+# 9️⃣ Database Replication
 
-inheritance
+Database kopyalanır.
 
-polymorphism
+- Primary → Write
+- Replica → Read
 
-abstraction
+```
+App → Read → Replica
+App → Write → Primary
+```
 
-3.3 Python OOP Advanced
+Avantaj:
 
-dunder methods
+✔ Read performance artar  
+✔ Primary yükü azalır  
 
-str
+---
 
-repr
+# 🔟 Database Sharding
 
-eq
+Database yatay bölünür.
 
-hash
+Örnek:
 
-3.4 Class Types
+- Users 1–1M → Shard1
+- Users 1M–2M → Shard2
 
-instance method
+Avantaj:
 
-class method
+✔ Büyük veri ölçeklenebilir  
+✔ Tek DB bottleneck olmaz  
 
-static method
+---
 
-3.5 Advanced OOP
+# 11️⃣ Event-Driven Architecture
 
-multiple inheritance
+Bir event oluşur:
 
-MRO (method resolution order)
+```
+UserRegistered
+```
 
-mixins
+Servisler bu event’i dinler:
 
-abstract base classes
+- Email Service → Welcome mail
+- Analytics → Event log
+- Billing → Trial başlat
 
-BÖLÜM 4 — SOLID ve SOFTWARE DESIGN
+Avantaj:
 
-SOLID principles
+✔ Loose coupling  
+✔ Microservice uyumlu yapı  
+✔ High scalability  
 
-Single Responsibility Principle
+---
 
-Open Closed Principle
+# 12️⃣ Circuit Breaker Pattern
 
-Liskov Substitution Principle
+Bir servis çökerse zincirleme hata oluşmasını engeller.
 
-Interface Segregation Principle
+Örnek:
 
-Dependency Inversion Principle
+Payment service down.
 
-Design Patterns
+Circuit breaker:
 
-Singleton
+- Request göndermez
+- Timeout beklemez
+- Fallback döner
 
-Factory
+Bu pattern özellikle microservice mimarilerde kritiktir.
 
-Strategy
+---
 
-Observer
+# 13️⃣ Observability
 
-Adapter
+Production sistem izlenmelidir.
 
-Decorator pattern
+3 temel bileşen:
 
-BÖLÜM 5 — CONCURRENCY ve PARALLELISM
+## Logging
 
-Process nedir
+```python
+logger.info("User logged in")
+```
 
-Thread nedir
+## Monitoring
 
-concurrency nedir
+- CPU
+- RAM
+- Disk
+- Response time
 
-parallelism nedir
+## Tracing
 
-GIL (Global Interpreter Lock)
+Request’in tüm servisler arasındaki yolculuğunu gösterir.
 
-threading module
+Observability olmadan production yönetilemez.
 
-multiprocessing module
+---
 
-async nedir
+# 14️⃣ Graceful Degradation
 
-event loop nedir
+Sistem tamamen çökmez.
 
-asyncio nedir
+Örnek:
 
-BÖLÜM 6 — DATABASE TEMELLERİ
+Recommendation service down.
 
-Database nedir
+Ana sistem:
 
-relational database nedir
+- Çalışmaya devam eder
+- “Öneriler şu an mevcut değil” mesajı gösterir
 
-table nedir
+High availability sistemlerin özelliğidir.
 
-row nedir
+---
 
-column nedir
+# 15️⃣ CAP Theorem
 
-primary key
+Distributed sistemlerde aynı anda şu 3 özelliğin hepsi garanti edilemez:
 
-foreign key
+- Consistency
+- Availability
+- Partition Tolerance
 
-index nedir
+Sadece 2’si seçilebilir.
 
-constraint nedir
+Örnek:
 
-BÖLÜM 7 — SQL
+- Banka sistemi → Consistency öncelikli  
+- Sosyal medya → Availability öncelikli  
 
-SELECT
+Distributed database tasarımı CAP’e göre yapılır.
 
-INSERT
+---
 
-UPDATE
+# Production Django Mimarisi Örneği
 
-DELETE
+```
+Client
+↓
+CDN
+↓
+Load Balancer
+↓
+Django Servers (Stateless)
+↓
+Redis Cache
+↓
+PostgreSQL (Primary + Replica)
+↓
+Worker (Celery)
+```
 
-WHERE
+Bu yapı:
 
-JOIN
+- Scalable
+- Fault tolerant
+- High performance
+- Production ready
 
-INNER JOIN
+---
 
-LEFT JOIN
+# Senior Backend Engineer’ın Bildiği Advanced Concepts
 
-GROUP BY
+✔ Stateless architecture  
+✔ Horizontal scaling  
+✔ Load balancing  
+✔ Advanced caching  
+✔ Background jobs  
+✔ Message queues  
+✔ Database replication & sharding  
+✔ Observability  
+✔ Fault tolerance  
+✔ Distributed systems mantığı  
 
-ORDER BY
+---
 
-LIMIT
+# Real World Production Stack Örneği
 
-OFFSET
+:contentReference[oaicite:9]{index=9} backend mimarisi (genel yaklaşım):
 
-BÖLÜM 8 — DATABASE ADVANCED
+- Load balancer
+- Stateless application servers
+- Redis cache
+- Distributed database
+- Queue systems
+- Horizontal scaling
 
-indexing internals
+---
 
-query optimization
+# Özet
 
-normalization
+Bu bölümden sonra artık biliyorsun:
 
-denormalization
+- Scalable system nasıl tasarlanır
+- Production backend nasıl çalışır
+- High performance sistem nasıl kurulur
+- Distributed system temelleri
+- Modern backend engineering prensipleri
 
-transactions
-
-ACID properties
-
-isolation levels
-
-BÖLÜM 9 — DJANGO CORE
-
-Django architecture
-
-MTV pattern
-
-Django project structure
-
-Django app structure
-
-settings.py
-
-BÖLÜM 10 — DJANGO ORM
-
-ORM nedir
-
-Model nedir
-
-QuerySet nedir
-
-Lazy evaluation
-
-get vs filter
-
-exclude
-
-annotate
-
-aggregate
-
-BÖLÜM 11 — DJANGO MODELS
-
-field types
-
-ForeignKey
-
-OneToOneField
-
-ManyToManyField
-
-migrations
-
-signals
-
-BÖLÜM 12 — DJANGO VIEWS
-
-function based views
-
-class based views
-
-generic views
-
-BÖLÜM 13 — DJANGO REST FRAMEWORK
-
-serializer
-
-model serializer
-
-APIView
-
-ViewSet
-
-router
-
-BÖLÜM 14 — AUTHENTICATION
-
-authentication nedir
-
-authorization nedir
-
-session auth
-
-token auth
-
-JWT
-
-BÖLÜM 15 — REDIS
-
-Redis nedir
-
-caching nedir
-
-Redis data types
-
-Redis caching strategy
-
-BÖLÜM 16 — HTTP & WEB
-
-HTTP nedir
-
-request nedir
-
-response nedir
-
-headers
-
-status codes
-
-REST
-
-BÖLÜM 17 — GIT
-
-git nedir
-
-commit
-
-branch
-
-merge
-
-rebase
-
-conflict
-
-BÖLÜM 18 — DOCKER
-
-container nedir
-
-image nedir
-
-Dockerfile
-
-docker compose
-
-BÖLÜM 19 — SYSTEM DESIGN
-
-scalability
-
-load balancing
-
-caching strategy
-
-horizontal scaling
-
-vertical scaling
-
-BÖLÜM 20 — PRODUCTION
-
-production nedir
-
-deployment
-
-CI/CD
-
-logging
-
-monitoring
-
-BÖLÜM 21 — ARCHITECTURE
-
-monolith
-
-microservice
-
-client server
-
-BÖLÜM 22 — DISTRIBUTED SYSTEMS
-
-distributed system nedir
-
-CAP theorem
-
-consistency
-
-availability
-
-partition tolerance
-
-BÖLÜM 23 — PERFORMANCE
-
-bottleneck nedir
-
-profiling
-
-optimization
-
-BÖLÜM 24 — SECURITY
-
-hashing
-
-encryption
-
-HTTPS
-
-CORS
-
-CSRF
-
-BÖLÜM 25 — TESTING
-
-unit testing
-
-integration testing
-
-pytest
-
-mocking
-
-BÖLÜM 26 — CLEAN CODE
-
-clean code principles
-
-code smells
-
-refactoring
-
-BÖLÜM 27 — BACKEND ARCHITECTURE
-
-service layer
-
-repository pattern
-
-layered architecture
-
-BÖLÜM 28 — REAL PRODUCTION KNOWLEDGE
-
-nginx nedir
-
-gunicorn nedir
-
-reverse proxy
-
-load balancer
-
-BÖLÜM 29 — CACHE STRATEGIES
-
-cache aside
-
-write through
-
-write back
-
-BÖLÜM 30 — SENIOR LEVEL KNOWLEDGE
-
-idempotency
-
-race condition
-
-deadlock
-
-optimistic locking
-
-pessimistic locking
+Bu noktadan sonra artık sadece API yazmıyorsun.  
+Sistem tasarlıyorsun.

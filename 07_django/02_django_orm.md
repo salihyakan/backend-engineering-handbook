@@ -1,568 +1,492 @@
-# BÖLÜM 10 — DJANGO ORM
+# BÖLÜM 9 — DJANGO CORE
 
-Bu bölümde şunları derinlemesine öğreneceksin:
+Bu bölümde şunları öğreneceksin:
 
-- ORM nedir
-- Model nedir
-- QuerySet nedir
-- Lazy evaluation nedir
-- get vs filter farkı
-- exclude nedir
-- annotate nedir
-- aggregate nedir
+- Django architecture
+- MTV pattern
+- Django project structure
+- Django app structure
+- settings.py
+- .env yönetimi
+- Static & Media configuration
+- Custom User Model
+- Migration mantığı
+- Yönetim komutları
+- Signals / Middleware / Context Processors
+- Production vs Development ayırımı
+- Reusable app mantığı
 
-Bu konular Django’da database ile **profesyonel çalışmayı** belirler.
-
----
-
-## 1️⃣ ORM Nedir?
-
-**ORM = Object Relational Mapping**
-
-### Tanım
-
-Database tablolarını Python objeleri olarak kullanmanı sağlar.
-
-Yani:
-
-SQL yazmadan database ile konuşursun.
+Bu konular Django’nun **iskeleti**dir.
 
 ---
 
-### SQL vs ORM Karşılaştırması
+# 1️⃣ Django Architecture (Django Mimarisi)
 
-**SQL:**
+## Django nedir?
 
-```sql
-SELECT * FROM product WHERE price > 100;
-```
+Django, Python ile yazılmış yüksek seviyeli bir web framework’tür.
 
-**Django ORM:**
+### Amaç
 
-```python
-Product.objects.filter(price__gt=100)
-```
-
-ORM şunu yapar:
-
-```
-Python kodu → SQL'e çevirir
-```
-
-Sen SQL yazmazsın.
+- Hızlı geliştirme
+- Güvenli yapı
+- Maintainable mimari
+- DRY prensibi
 
 ---
 
-### ORM Neden Kullanılır?
+## Django Request Lifecycle (İstek Yaşam Döngüsü)
 
-Avantajları:
+### Genel Akış
 
-- SQL yazmadan database kullanırsın
-- Daha güvenli (SQL injection koruması)
-- Daha temiz kod
-- Database bağımsız (PostgreSQL, MySQL, SQLite)
-
----
-
-## 2️⃣ Model Nedir?
-
-Model = Database tablosunun Python karşılığı
-
-### Örnek:
-
-```python
-from django.db import models
-
-class Product(models.Model):
-    name = models.CharField(max_length=255)
-    price = models.FloatField()
-```
-
-Bu model şu tabloyu oluşturur:
-
-```
-product table
-
-id | name | price
-```
-
-### Model instance = row
-
-Database row:
-
-```
-id=1
-name="Laptop"
-price=5000
-```
-
-Python karşılığı:
-
-```python
-product = Product.objects.get(id=1)
-print(product.name)
-```
+Browser  
+↓  
+URL  
+↓  
+Django  
+↓  
+View  
+↓  
+Model  
+↓  
+Database  
+↓  
+Template  
+↓  
+Response  
 
 ---
 
-## 3️⃣ Model Manager Nedir?
+## Detaylı Akış
 
-`objects` = manager
+### 1️⃣ Kullanıcı istek gönderir
 
-```python
-Product.objects
-```
+    GET /products/
 
-Database operasyonlarını yapar.
+### 2️⃣ URL dispatcher çalışır
+
+    # urls.py
+    urlpatterns = [
+        path("products/", product_list_view)
+    ]
+
+### 3️⃣ View çağrılır
+
+    def product_list_view(request):
+        products = Product.objects.all()
+        return render(request, "products.html", {"products": products})
+
+### 4️⃣ Model DB ile konuşur
+
+    Product.objects.all()
+
+### 5️⃣ Template render edilir
+
+### 6️⃣ HTML response döner
+
+---
+
+# 2️⃣ MTV Pattern (Model Template View)
+
+Django MVC değil, MTV kullanır.
+
+## Django MTV
+
+- Model → Data
+- Template → UI
+- View → Business Logic
+
+### Önemli
+
+- Django View = MVC Controller
+- Django Template = MVC View
+
+---
+
+# 3️⃣ Model (Data Layer)
+
+    class Product(models.Model):
+        name = models.CharField(max_length=255)
+        price = models.DecimalField(max_digits=10, decimal_places=2)
+
+Her model bir database tablosudur.
+
+---
+
+# 4️⃣ View (Logic Layer)
+
+    def product_list(request):
+        products = Product.objects.all()
+        return render(request, "products.html", {"products": products})
+
+---
+
+# 5️⃣ Template (Presentation Layer)
+
+    {% for product in products %}
+      <p>{{ product.name }}</p>
+    {% endfor %}
+
+---
+
+# 6️⃣ Django Project Structure
+
+Komut:
+
+    django-admin startproject config
+
+## Oluşan yapı
+
+    config/
+        manage.py
+        config/
+            __init__.py
+            settings.py
+            urls.py
+            asgi.py
+            wsgi.py
+
+---
+
+## manage.py
+
+Komut çalıştırma dosyasıdır.
+
+    python manage.py runserver
+    python manage.py migrate
+    python manage.py createsuperuser
+
+---
+
+# 7️⃣ Django App Structure
+
+Komut:
+
+    python manage.py startapp products
+
+## App yapısı
+
+    products/
+        models.py
+        views.py
+        admin.py
+        apps.py
+        migrations/
+
+App = Feature modülü
+
+Project = Tüm sistem
+
+---
+
+# 8️⃣ Django Project vs App
+
+## Project
+
+Ana sistemdir.
+
+## App
+
+Bağımsız feature modülüdür.
 
 Örnek:
 
-```python
-Product.objects.all()
-Product.objects.filter()
-Product.objects.get()
-```
+    ecommerce/
+        users/
+        products/
+        orders/
 
 ---
 
-## 4️⃣ QuerySet Nedir?
+# 9️⃣ settings.py (En Kritik Dosya)
 
-QuerySet = Database query sonucu dönen object listesi
-
-```python
-products = Product.objects.all()
-```
-
-QuerySet türü:
-
-```
-<QuerySet [Product, Product, Product]>
-```
-
-Liste gibi davranır:
-
-```python
-for product in products:
-    print(product.name)
-```
-
-### SQL karşılığı
-
-```python
-Product.objects.all()
-```
-
-```sql
-SELECT * FROM product;
-```
+Django’nun kalbi.
 
 ---
 
-## 5️⃣ Lazy Evaluation (Çok Kritik)
+## BASE_DIR
 
-Django ORM **lazy çalışır**.
-
-Yani query hemen çalışmaz.
-
-```python
-products = Product.objects.all()
-```
-
-Bu anda SQL çalışmaz.
-
-### SQL ne zaman çalışır?
-
-Veriye eriştiğinde:
-
-```python
-for product in products:
-    print(product.name)
-```
-
-Şimdi SQL çalışır.
-
-Başka örnek:
-
-```python
-products = Product.objects.filter(price__gt=100)
-```
-
-SQL çalışmaz.
-
-Ama:
-
-```python
-list(products)
-```
-
-SQL çalışır.
-
-### Avantajı
-
-- Performans optimizasyonu
-- Gereksiz query çalışmaz
+    from pathlib import Path
+    BASE_DIR = Path(__file__).resolve().parent.parent
 
 ---
 
-## 6️⃣ get()
+# 🔐 .env / Environment Variables Yönetimi
 
-Tek bir object getirir.
+Production’da SECRET_KEY ve DB bilgileri kod içinde tutulmaz.
 
-```python
-product = Product.objects.get(id=1)
-```
+## 1️⃣ python-decouple kullanımı
 
-SQL:
+Kurulum:
 
-```sql
-SELECT * FROM product WHERE id=1;
-```
+    pip install python-decouple
 
-### Dönen:
+## .env dosyası
 
-- Product object
+    SECRET_KEY=super-secret-key
+    DEBUG=True
+    DB_NAME=mydb
+    DB_USER=postgres
+    DB_PASSWORD=1234
 
-### Hata durumları:
+## settings.py
 
-- Bulamazsa → `Product.DoesNotExist`
-- Birden fazla varsa → `MultipleObjectsReturned`
+    from decouple import config
 
-`get()` sadece **tek kayıt** için kullanılır.
+    SECRET_KEY = config("SECRET_KEY")
+    DEBUG = config("DEBUG", cast=bool)
 
----
-
-## 7️⃣ filter()
-
-Bir veya birden fazla object getirir.
-
-```python
-products = Product.objects.filter(price__gt=100)
-```
-
-SQL:
-
-```sql
-SELECT * FROM product WHERE price > 100;
-```
-
-### Dönen:
-
-- QuerySet
-
-`filter()` hata vermez.
-
-Boşsa:
-
-```
-<QuerySet []>
-```
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": config("DB_NAME"),
+            "USER": config("DB_USER"),
+            "PASSWORD": config("DB_PASSWORD"),
+        }
+    }
 
 ---
 
-### get vs filter farkı
+# 🧱 INSTALLED_APPS (Dev vs Production Ayrımı)
 
-| get | filter |
-|------|--------|
-| Tek object döner | QuerySet döner |
-| Hata verebilir | Hata vermez |
-| Unique kayıt için | Liste sonuçlar için |
+    INSTALLED_APPS = [
+        "django.contrib.admin",
+        "django.contrib.auth",
+        "products",
+        "users",
+    ]
 
----
+## Development ortamında
 
-## 8️⃣ exclude()
+    if DEBUG:
+        INSTALLED_APPS += ["debug_toolbar"]
 
-Belirli kayıtları hariç tutar.
-
-```python
-products = Product.objects.exclude(price__gt=100)
-```
-
-SQL:
-
-```sql
-SELECT * FROM product WHERE NOT price > 100;
-```
+Bu sayede production’da debug toolbar çalışmaz.
 
 ---
 
-## 9️⃣ Lookup Expressions (Çok Önemli)
+# 📂 Static & Media Configuration
 
-Filtreleme operatörleri:
+## Static (CSS, JS)
 
-- exact
-- gt
-- gte
-- lt
-- lte
-- contains
-- icontains
-- startswith
-- endswith
-- in
+    STATIC_URL = "/static/"
+    STATIC_ROOT = BASE_DIR / "staticfiles"
 
-### Örnekler:
+Production’da:
 
-```python
-Product.objects.filter(price__gt=100)
-Product.objects.filter(name__contains="Lap")
-Product.objects.filter(id__in=[1,2,3])
-```
+    python manage.py collectstatic
+
+collectstatic → tüm static dosyaları STATIC_ROOT içine toplar.
 
 ---
 
-## 🔟 Query Chaining
+## Media (User Uploads)
 
-Query’ler zincirlenebilir:
+    MEDIA_URL = "/media/"
+    MEDIA_ROOT = BASE_DIR / "media"
 
-```python
-Product.objects.filter(price__gt=100).exclude(name="Phone")
-```
+urls.py:
 
-SQL:
+    from django.conf import settings
+    from django.conf.urls.static import static
 
-```sql
-SELECT * FROM product
-WHERE price > 100 AND name != "Phone";
-```
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 ---
 
-## 11️⃣ create()
+# 👤 Custom User Model (Çok Kritik)
 
-Yeni kayıt oluşturur:
+Projeye başlarken yapılmalı.
 
-```python
-Product.objects.create(
-    name="Laptop",
-    price=5000
-)
-```
+## users/models.py
 
-SQL:
+    from django.contrib.auth.models import AbstractUser
 
-```sql
-INSERT INTO product (name, price) VALUES ("Laptop", 5000);
-```
+    class User(AbstractUser):
+        phone = models.CharField(max_length=20, blank=True)
 
----
+## settings.py
 
-## 12️⃣ save()
+    AUTH_USER_MODEL = "users.User"
 
-```python
-product = Product(name="Phone", price=2000)
-product.save()
-```
+⚠️ Proje başladıktan sonra değiştirmek migration kaosuna yol açar.
 
 ---
 
-## 13️⃣ update()
+# 🔄 Migrations Mantığı
 
-```python
-Product.objects.filter(id=1).update(price=3000)
-```
+## makemigrations
 
-SQL:
+Model değişikliğini migration dosyasına çevirir.
 
-```sql
-UPDATE product SET price=3000 WHERE id=1;
-```
+    python manage.py makemigrations
 
----
+## migrate
 
-## 14️⃣ delete()
+Migration dosyasını DB’ye uygular.
 
-```python
-Product.objects.filter(id=1).delete()
-```
+    python manage.py migrate
 
-SQL:
+### Arka Plan
 
-```sql
-DELETE FROM product WHERE id=1;
-```
+- Django modelleri analiz eder
+- SQL üretir
+- DB’ye uygular
+
+Migration dosyaları:
+
+    products/migrations/0001_initial.py
 
 ---
 
-## 15️⃣ aggregate()
+# ⚙️ Yönetim Komutları
 
-Summary hesaplar.
+## startapp
 
-```python
-from django.db.models import Avg
+    python manage.py startapp blog
 
-avg_price = Product.objects.aggregate(Avg("price"))
-```
+## createsuperuser
 
-Sonuç:
+    python manage.py createsuperuser
 
-```python
-{'price__avg': 2500}
-```
+## makemigrations
 
-SQL:
+    python manage.py makemigrations
 
-```sql
-SELECT AVG(price) FROM product;
-```
+## migrate
 
-Diğerleri:
+    python manage.py migrate
 
-- Count
-- Sum
-- Max
-- Min
+## loaddata
+
+Fixture yükler:
+
+    python manage.py loaddata data.json
 
 ---
 
-## 16️⃣ annotate()
+# 🔔 Signals
 
-Her row için hesaplama yapar.
+Model event’lerini dinler.
 
-```python
-from django.db.models import Count
+    from django.db.models.signals import post_save
+    from django.dispatch import receiver
 
-Category.objects.annotate(product_count=Count("product"))
-```
+    @receiver(post_save, sender=User)
+    def create_profile(sender, instance, created, **kwargs):
+        if created:
+            Profile.objects.create(user=instance)
 
-Her category için product sayısı ekler.
+Kullanım alanı:
 
-SQL:
-
-```sql
-SELECT category.*, COUNT(product.id)
-FROM category
-LEFT JOIN product
-GROUP BY category.id;
-```
+- User oluşturulunca profil oluşturma
+- Email gönderme
 
 ---
 
-### annotate vs aggregate farkı
+# 🧩 Middleware
 
-| aggregate | annotate |
-|-----------|----------|
-| Tek sonuç döner | Her row için sonuç döner |
-| Summary | Row-level hesaplama |
+Request/response sürecine araya girer.
 
----
+    MIDDLEWARE = [
+        "django.middleware.security.SecurityMiddleware",
+    ]
 
-## 17️⃣ exists()
+Örnek kullanım:
 
-```python
-Product.objects.filter(id=1).exists()
-```
-
-True / False döner.
+- Logging
+- Authentication kontrolü
+- Rate limiting
 
 ---
 
-## 18️⃣ first() ve last()
+# 🌐 Context Processor
 
-```python
-Product.objects.first()
-Product.objects.last()
-```
+Tüm template’lere global veri gönderir.
 
----
+    def global_settings(request):
+        return {"site_name": "MySite"}
 
-## 19️⃣ order_by()
+settings.py:
 
-```python
-Product.objects.order_by("price")
-Product.objects.order_by("-price")
-```
+    "context_processors": [
+        "django.template.context_processors.request",
+        "core.context_processors.global_settings",
+    ]
 
 ---
 
-## 20️⃣ values()
+# 📦 Reusable App Mantığı
 
-Dictionary döner:
+App’ler bağımsız olmalıdır.
 
-```python
-Product.objects.values("name", "price")
-```
+Reusable app özellikleri:
 
-Sonuç:
+- Kendi models
+- Kendi templates
+- Kendi urls
+- Başka projeye pip ile eklenebilir
 
-```python
-[
- {'name': 'Laptop', 'price': 5000}
-]
-```
+Bu yaklaşım büyük projelerde clean architecture sağlar.
 
 ---
 
-## 21️⃣ values_list()
+# 🚀 Production Flow
 
-Tuple döner:
+Gerçek akış:
 
-```python
-Product.objects.values_list("name", "price")
-```
-
----
-
-## 22️⃣ select_related() (Çok Kritik Performance)
-
-ForeignKey için JOIN optimization yapar.
-
----
-
-## 23️⃣ prefetch_related()
-
-ManyToMany için optimization yapar.
-
----
-
-# 🎯 Özet (Mülakat İçin Kritik)
-
-**ORM:**  
-Python ile database yönetmeyi sağlar.
-
-**Model:**  
-Database tablosu.
-
-**QuerySet:**  
-Query sonucu dönen lazy object collection.
-
-**Lazy evaluation:**  
-Query sadece ihtiyaç olduğunda çalışır.
-
-**get():**  
-Tek kayıt döner.
-
-**filter():**  
-Birden fazla kayıt döner (QuerySet).
-
-**aggregate():**  
-Summary hesaplar.
-
-**annotate():**  
-Row-level hesaplama yapar.
+User  
+↓  
+Nginx  
+↓  
+Gunicorn  
+↓  
+Django  
+↓  
+View  
+↓  
+Model  
+↓  
+DB  
+↓  
+Response  
 
 ---
 
-# 🎤 Mülakat Soruları
+# 🎯 Mülakat Özeti
 
-### Soru:
-QuerySet nedir?
+## Django MVC mi?
 
-### Cevap:
-Database query sonucu dönen lazy object collection’dır.
+Hayır. MTV kullanır.
+
+## Project vs App?
+
+Project tüm sistemdir.  
+App feature modülüdür.
+
+## settings.py?
+
+Tüm konfigürasyon merkezidir.
+
+## Migration nedir?
+
+Model değişikliklerini DB’ye uygulama sistemidir.
+
+## Custom User ne zaman yapılmalı?
+
+Projenin en başında.
 
 ---
 
-### Soru:
-Lazy evaluation nedir?
+# 🔥 Bu Bölümün Kritik Noktaları
 
-### Cevap:
-Query sadece ihtiyaç olduğunda çalışır.
+- MTV mantığını bil
+- Request lifecycle’ı anlatabil
+- settings.py güvenliğini açıkla
+- .env kullanımını bil
+- Static & Media farkını anlat
+- Migration sistemini mantıksal olarak açıkla
+- Custom User riskini bil
+- Production vs Development ayrımını açıkla
 
----
-
-### Soru:
-get ve filter farkı nedir?
-
-### Cevap:
-get tek object döner ve hata verebilir.  
-filter QuerySet döner ve hata vermez.
+Bu bölüm Django’nun omurgasıdır.

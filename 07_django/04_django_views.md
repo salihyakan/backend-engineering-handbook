@@ -5,6 +5,11 @@ Bu bölümde şunları öğreneceksin:
 - Function Based Views (FBV)
 - Class Based Views (CBV)
 - Generic Views
+- View lifecycle
+- Mixin yapısı
+- Form view’lar
+- View.as_view() mantığı
+- DRF ile API entegrasyonu
 - Hangisi ne zaman kullanılır
 - Production seviyesinde doğru kullanım
 
@@ -42,7 +47,7 @@ En basit view türüdür.
 
 Normal Python fonksiyonudur.
 
-## Örnek 1 — Basit View
+## Örnek — Basit View
 
 ```python
 from django.http import HttpResponse
@@ -62,21 +67,9 @@ urlpatterns = [
 ]
 ```
 
-Tarayıcı:
-
-```
-/hello/
-```
-
-Response:
-
-```
-Hello World
-```
-
 ---
 
-# 3️⃣ Template Render Eden View
+# 3️⃣ Template Render Eden FBV
 
 ```python
 from django.shortcuts import render
@@ -85,14 +78,10 @@ def product_list(request):
     return render(request, "products.html")
 ```
 
-## render() nedir?
-
-Shortcut fonksiyondur.
-
-Şunları yapar:
+## render() ne yapar?
 
 - Template’i yükler
-- Context ile render eder
+- Context ile birleştirir
 - HttpResponse döner
 
 ---
@@ -111,19 +100,9 @@ def product_list(request):
     })
 ```
 
-## Template
-
-```html
-{% for product in products %}
-  <p>{{ product.name }}</p>
-{% endfor %}
-```
-
 ---
 
 # 5️⃣ Request Object (Çok Önemli)
-
-View’a gelen `request` objesi HTTP bilgilerini taşır.
 
 ```python
 def example_view(request):
@@ -141,8 +120,6 @@ def example_view(request):
 
 ## request.GET
 
-Query parametreleri:
-
 ```
 /products/?category=1
 ```
@@ -153,15 +130,13 @@ request.GET.get("category")
 
 ## request.POST
 
-Form verileri:
-
 ```python
 request.POST.get("name")
 ```
 
 ---
 
-# 6️⃣ GET vs POST Handling
+# 6️⃣ GET vs POST Handling (FBV)
 
 ```python
 def product_create(request):
@@ -173,13 +148,11 @@ def product_create(request):
     return render(request, "create.html")
 ```
 
-Production’da genelde Django Forms veya ModelForm tercih edilir.
+Production’da Django Forms tercih edilir.
 
 ---
 
 # 7️⃣ JsonResponse
-
-API response üretmek için kullanılır.
 
 ```python
 from django.http import JsonResponse
@@ -189,23 +162,15 @@ def api_view(request):
     return JsonResponse(data)
 ```
 
-Response:
-
-```json
-{
-  "name": "Laptop"
-}
-```
-
 ---
 
 # 8️⃣ Class Based Views (CBV)
 
 View’ları class olarak yazarsın.
 
-Daha güçlü ve reusable’dır.
+Daha reusable ve scalable’dır.
 
-## Örnek
+## Basit CBV
 
 ```python
 from django.views import View
@@ -223,13 +188,62 @@ class HelloView(View):
 path("hello/", HelloView.as_view())
 ```
 
-## as_view() nedir?
+---
 
-Class’ı callable view fonksiyonuna çevirir.
+# 9️⃣ View.as_view() Nedir?
+
+`as_view()`:
+
+- Class’ı callable fonksiyona çevirir
+- Her request için yeni instance oluşturur
+- dispatch() metodunu tetikler
+
+Gerçekte olan:
+
+```
+as_view()
+   ↓
+instance oluşturulur
+   ↓
+dispatch()
+   ↓
+get() / post() çağrılır
+```
 
 ---
 
-# 9️⃣ GET ve POST Handling (CBV)
+# 🔟 CBV Lifecycle (Yaşam Döngüsü)
+
+Bir CBV’nin yaşam akışı:
+
+```
+request gelir
+↓
+as_view() çağrılır
+↓
+class instance oluşturulur
+↓
+dispatch() çalışır
+↓
+HTTP method tespit edilir
+↓
+get() / post() / put() çağrılır
+↓
+response döner
+```
+
+## dispatch()
+
+HTTP method routing yapar.
+
+```python
+def dispatch(self, request, *args, **kwargs):
+    return super().dispatch(request, *args, **kwargs)
+```
+
+---
+
+# 11️⃣ GET ve POST Handling (CBV)
 
 ```python
 from django.views import View
@@ -249,35 +263,15 @@ class ProductView(View):
 
 ---
 
-# 🔟 FBV vs CBV Karşılaştırma
+# 12️⃣ Generic Views (Çok Önemli)
 
-## FBV
+Django’nun hazır CRUD CBV yapılarıdır.
 
-- Basit
-- Okuması kolay
-- Küçük projeler için ideal
-
-## CBV
-
-- Daha scalable
-- Daha reusable
-- Büyük projelerde daha organize
-
-Production’da genelde CBV tercih edilir.
-
----
-
-# 11️⃣ Generic Views (Çok Önemli)
-
-Django’nun hazır CRUD view class’larıdır.
-
-Production’da çok kullanılır.
+Production’da yoğun kullanılır.
 
 ---
 
 ## 🔹 ListView
-
-Listeleme view’ı
 
 ```python
 from django.views.generic import ListView
@@ -286,27 +280,18 @@ from .models import Product
 class ProductListView(ListView):
     model = Product
     template_name = "products.html"
+    paginate_by = 20
 ```
 
-Otomatik olarak:
+Varsayılan context:
 
 ```
-SELECT * FROM product
-```
-
-Template:
-
-```html
-{% for product in object_list %}
-    {{ product.name }}
-{% endfor %}
+object_list
 ```
 
 ---
 
 ## 🔹 DetailView
-
-Tek object gösterir.
 
 ```python
 from django.views.generic import DetailView
@@ -353,32 +338,82 @@ from django.views.generic import DeleteView
 
 ---
 
-# 12️⃣ Context Nedir?
+# 13️⃣ FormView ve Form Handling
 
-Template’e gönderilen veridir.
+FormView daha kontrollü form yönetimi sağlar.
 
 ```python
-return render(request, "template.html", {
-    "products": products
-})
+from django.views.generic import FormView
+from .forms import ContactForm
+
+class ContactView(FormView):
+    template_name = "contact.html"
+    form_class = ContactForm
+    success_url = "/thanks/"
+
+    def form_valid(self, form):
+        form.save()
+        return super().form_valid(form)
 ```
 
-Template içinde:
-
-```html
-{{ products }}
-```
-
-CBV’de varsayılan context:
+Lifecycle:
 
 ```
-object
-object_list
+GET → boş form
+POST → form_valid / form_invalid
 ```
 
 ---
 
-# 13️⃣ get_object_or_404 (Production Standard)
+# 14️⃣ Mixinler (Çok Kritik)
+
+Mixin = Reusable davranış modülü.
+
+## LoginRequiredMixin
+
+```python
+from django.contrib.auth.mixins import LoginRequiredMixin
+
+class DashboardView(LoginRequiredMixin, ListView):
+    model = Product
+```
+
+## Mixin Sırası Önemlidir
+
+Mixin’ler soldan sağa çalışır.
+
+```
+class A(B, C, D)
+```
+
+Python MRO (Method Resolution Order) uygulanır.
+
+---
+
+# 15️⃣ get_queryset Override (Production Seviyesi)
+
+```python
+class ProductListView(ListView):
+    model = Product
+
+    def get_queryset(self):
+        return Product.objects.filter(is_active=True)
+```
+
+---
+
+# 16️⃣ get_context_data Override
+
+```python
+def get_context_data(self, **kwargs):
+    context = super().get_context_data(**kwargs)
+    context["title"] = "Product List"
+    return context
+```
+
+---
+
+# 17️⃣ get_object_or_404
 
 ```python
 from django.shortcuts import get_object_or_404
@@ -386,156 +421,153 @@ from django.shortcuts import get_object_or_404
 product = get_object_or_404(Product, id=1)
 ```
 
-Bulamazsa otomatik 404 döner.
-
-Production’da `try/except` yerine tercih edilir.
+Production’da standarttır.
 
 ---
 
-# 14️⃣ redirect
+# 18️⃣ redirect
 
 ```python
 from django.shortcuts import redirect
 
-return redirect("/products/")
-```
-
-Named URL ile kullanım daha doğrudur:
-
-```python
 return redirect("product-list")
 ```
 
 ---
 
-# 15️⃣ View Lifecycle
-
-```
-request gelir
-↓
-url match edilir
-↓
-view çalışır
-↓
-response döner
-```
-
----
-
-# 16️⃣ Decorators (Çok Önemli)
-
-Login zorunlu yapmak:
-
-```python
-from django.contrib.auth.decorators import login_required
-
-@login_required
-def dashboard(request):
-    return render(request, "dashboard.html")
-```
-
-CBV için:
-
-```python
-from django.contrib.auth.mixins import LoginRequiredMixin
-
-class DashboardView(LoginRequiredMixin, View):
-    pass
-```
-
----
-
-# 17️⃣ Production Best Practice
-
-Production ortamında:
-
-- Generic Views kullan
-- CBV tercih et
-- View içinde business logic şişirme
-- Business logic’i service layer’a taşı
-- Fat view, thin model yaklaşımından kaçın
-
----
-
-# 18️⃣ Gerçek Production Örneği
-
-```python
-class ProductListView(ListView):
-    model = Product
-    paginate_by = 20
-    ordering = ["-created_at"]
-```
-
-Ek olarak:
-
-```python
-def get_queryset(self):
-    return Product.objects.filter(is_active=True)
-```
-
----
-
-# 19️⃣ FBV vs CBV vs Generic View — Ne Zaman Hangisi?
+# 19️⃣ FBV vs CBV vs Generic — Ne Zaman?
 
 ## FBV
 
-- Küçük logic
-- Basit endpoint
-- Hızlı yazım
+- Küçük endpoint
+- Basit logic
+- Hızlı geliştirme
 
 ## CBV
 
-- Reusable logic
-- Complex view yapıları
+- Reusable yapı
+- Complex view’lar
 
-## Generic View
+## Generic CBV
 
 - CRUD işlemleri
-- Standart listeleme/detay/form yapıları
+- Pagination
+- Filtering
+- Production standard
 
-Production’da en yaygın kullanım:
+En yaygın kullanım:
 
-> Generic CBV
-
----
-
-# 🎤 20️⃣ Mülakat Soruları
-
-### Soru:
-View nedir?
-
-### Cevap:
-Request’i işleyen ve response dönen yapıdır.
+> Generic Class Based Views
 
 ---
 
+# 20️⃣ API Tarafı — DRF Entegrasyonu
+
+Django HTML için optimize edilmiştir.
+
+API için genelde Django REST Framework kullanılır.
+
+---
+
+## DRF View
+
+```python
+from rest_framework.views import APIView
+from rest_framework.response import Response
+
+class ProductAPIView(APIView):
+
+    def get(self, request):
+        return Response({"message": "API working"})
+```
+
+---
+
+## DRF Generic API View
+
+```python
+from rest_framework.generics import ListAPIView
+from .models import Product
+from .serializers import ProductSerializer
+
+class ProductListAPI(ListAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+```
+
+---
+
+## DRF ViewSet (En Production)
+
+```python
+from rest_framework.viewsets import ModelViewSet
+
+class ProductViewSet(ModelViewSet):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+```
+
+Router otomatik URL üretir.
+
+---
+
+# 21️⃣ Production Best Practices
+
+- Generic CBV kullan
+- Mixin ile yetkilendirme yap
+- View içinde business logic şişirme
+- Service layer oluştur
+- API için DRF kullan
+- Pagination ve filtering ekle
+- get_queryset override et
+
+---
+
+# 🎤 22️⃣ Mülakat Soruları
+
 ### Soru:
-FBV vs CBV farkı?
+CBV lifecycle nedir?
 
 ### Cevap:
-FBV fonksiyon tabanlıdır,  
-CBV class tabanlıdır ve daha reusable’dır.
+as_view → instance → dispatch → http method → response
 
 ---
 
 ### Soru:
-Generic View nedir?
+Mixin nedir?
 
 ### Cevap:
-Django’nun hazır CRUD view class’larıdır.
+Reusable davranış modülüdür.
+
+---
+
+### Soru:
+Generic View neden tercih edilir?
+
+### Cevap:
+CRUD işlemlerini boilerplate kod yazmadan sağlar.
+
+---
+
+### Soru:
+DRF neden kullanılır?
+
+### Cevap:
+RESTful API geliştirmek için optimize edilmiştir.
 
 ---
 
 # 🎯 Özet
 
-View = request handler
+View = Request handler
 
 Türleri:
 
 - FBV
 - CBV
-- Generic Views
+- Generic CBV
+- DRF API View
 
-Production’da en çok kullanılan yapı:
+Production standard:
 
-> Generic Class Based Views
+> Generic CBV + Mixin + DRF
