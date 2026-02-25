@@ -69,75 +69,77 @@ Her bölüm bir sonrakinin temelini oluşturur. Atlamadan ilerlemeniz önerilir.
 # 📂 Repository Yapısı
 
 
-backend-engineering-handbook
+```text
+backend-engineering-handbook/
 │
-├─ 01_programming_fundamentals
-│ ├─ 01_basic_concepts.md
-│ ├─ 02_control_flow.md
-│ └─ 03_functions.md
+├── 01_programming_fundamentals/
+│   ├── 01_basic_concepts.md
+│   ├── 02_control_flow.md
+│   └── 03_functions.md
 │
-├─ 02_python_core
-│ ├─ 01_python_basics.md
-│ ├─ 02_data_types.md
-│ ├─ 03_memory_model.md
-│ ├─ 04_collections_internal.md
-│ ├─ 05_advanced_functions.md
-│ ├─ 06_generators_iterators.md
-│ ├─ 07_decorators.md
-│ ├─ 08_closures.md
-│ ├─ 09_error_handling.md
-│ └─ 10_modules_packages.md
+├── 02_python_core/
+│   ├── 01_python_basics.md
+│   ├── 02_data_types.md
+│   ├── 03_memory_model.md
+│   ├── 04_collections_internal.md
+│   ├── 05_advanced_functions.md
+│   ├── 06_generators_iterators.md
+│   ├── 07_decorators.md
+│   ├── 08_closures.md
+│   ├── 09_error_handling.md
+│   └── 10_modules_packages.md
 │
-├─ 03_oop
-│ ├─ 01_oop_basics.md
-│ ├─ 02_oop_principles.md
-│ ├─ 03_advanced_oop.md
-│ ├─ 04_class_types.md
-│ └─ 05_advanced_oop-2.md
+├── 03_oop/
+│   ├── 01_oop_basics.md
+│   ├── 02_oop_principles.md
+│   ├── 03_advanced_oop.md
+│   ├── 04_class_types.md
+│   └── 05_advanced_oop-2.md
 │
-├─ 04_software_design
-│ ├─ design_patterns.md
-│ └─ solid_principles.md
+├── 04_software_design/
+│   ├── design_patterns.md
+│   └── solid_principles.md
 │
-├─ 05_concurrency_parallelism
-│ └─ concurrency.md
+├── 05_concurrency_parallelism/
+│   └── concurrency.md
 │
-├─ 06_database
-│ ├─ 01_database_basics.md
-│ ├─ 02_sql_basics.md
-│ └─ 03_database_advanced.md
+├── 06_database/
+│   ├── 01_database_basics.md
+│   ├── 02_sql_basics.md
+│   └── 03_database_advanced.md
 │
-├─ 07_django
-│ ├─ 01_django_core.md
-│ ├─ 02_django_orm.md
-│ ├─ 03_django_models.md
-│ ├─ 04_django_views.md
-│ ├─ 05_drf.md
-│ ├─ 06_authentication.md
-│ └─ 07_django_deployment.md
+├── 07_django/
+│   ├── 01_django_core.md
+│   ├── 02_django_orm.md
+│   ├── 03_django_models.md
+│   ├── 04_django_views.md
+│   ├── 05_drf.md
+│   ├── 06_authentication.md
+│   └── 07_django_deployment.md
 │
-├─ 08_infrastructure
-│ ├─ docker.md
-│ ├─ git.md
-│ ├─ http_web.md
-│ ├─ production.md
-│ └─ redis.md
+├── 08_infrastructure/
+│   ├── docker.md
+│   ├── git.md
+│   ├── http_web.md
+│   ├── production.md
+│   └── redis.md
 │
-├─ 09_system_design
-│ ├─ 01_system_design_fundamentals.md
-│ ├─ 02_scalability_and_performance.md
-│ ├─ 03_distributed_systems.md
-│ └─ 04_real_world_architecture_and_patterns.md
+├── 09_system_design/
+│   ├── 01_system_design_fundamentals.md
+│   ├── 02_scalability_and_performance.md
+│   ├── 03_distributed_systems.md
+│   └── 04_real_world_architecture_and_patterns.md
 │
-├─ 10_security_testing_clean_code
-│ ├─ clean_code.md
-│ ├─ security.md
-│ └─ testing.md
+├── 10_security_testing_clean_code/
+│   ├── clean_code.md
+│   ├── security.md
+│   └── testing.md
 │
-├─ 11_senior_topics
-│ └─ advanced_backend_concepts.md
+├── 11_senior_topics/
+│   └── advanced_backend_concepts.md
 │
-└─ README.md
+└── README.md
+```
 
 
 ---
