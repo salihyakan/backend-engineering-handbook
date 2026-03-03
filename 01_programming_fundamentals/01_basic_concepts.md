@@ -1,81 +1,105 @@
-# 1.1 Temel Programlama Kavramları
+# BÖLÜM 1 — BASIC CONCEPTS (Temel Programlama ve Python Kavramları)
+
+Bu bölüm:
+
+- Programlama mantığını temellendirir
+- Python’ın çalışma modelini açıklar
+- Bellek yönetimini kavratır
+- Algoritmik düşünceyi başlatır
+- Junior–Mid seviye mülakatların büyük kısmını kapsar
 
 ---
 
-## 1️⃣ Programlama Nedir?
+# 1. Programlama Nedir?
 
-Programlama, bir bilgisayara belirli bir problemi çözmesi için adım adım talimatlar vermektir.
+Programlama, bir problemi çözmek için bilgisayara adım adım talimat vermektir.
 
-Bilgisayarlar yalnızca makine dili (binary: 0 ve 1) anlar. Biz insanlar ise Python, C, Java gibi yüksek seviyeli programlama dilleri kullanırız. Yazdığımız bu kodlar, makine diline çevrilerek çalıştırılır.
+Bilgisayarlar yalnızca **makine dili (binary: 0 ve 1)** anlar.  
+Biz yüksek seviyeli diller kullanırız (Python, C, Java gibi).  
 
-Programlama süreci üç temel aşamadan oluşur:
+Bu kodlar makine diline çevrilerek çalıştırılır.
+
+## Programlama Süreci
 
 1. Problemi analiz etmek  
-2. Çözüm algoritmasını tasarlamak  
-3. Bu çözümü bir programlama dili ile ifade etmek  
+2. Algoritmayı tasarlamak  
+3. Kodlamak  
+4. Test etmek  
 
-> Programlama = Problem Çözme + Algoritma + Kod
+> Programlama = Problem Çözme + Algoritma + Uygulama
 
 ---
 
-## 2️⃣ Compiler vs Interpreter
+# 2. Compiler vs Interpreter
 
-Bir programlama diliyle yazılmış kodun çalışabilmesi için makine diline çevrilmesi gerekir.
+Kodun çalışabilmesi için makine diline çevrilmesi gerekir.
 
-### Compiler (Derleyici)
+## Compiler (Derleyici)
 
-- Tüm kodu tek seferde makine diline çevirir.
-- Çıktı olarak çalıştırılabilir dosya üretir.
+- Tüm kodu tek seferde çevirir
+- Çalıştırılabilir dosya üretir
 - Örnek: C, C++
 
 Çalışma modeli:
 
 ```
-Source Code → Compiler → Executable File → Run
+Source Code → Compiler → Executable → Run
 ```
 
-**Avantajı:**  
-- Çalışma zamanı daha hızlıdır.
+Avantaj:
+- Yüksek performans
 
-**Dezavantajı:**  
-- Küçük bir hata bile olsa derleme tamamlanmaz.
+Dezavantaj:
+- Küçük hata bile derlemeyi durdurur
 
 ---
 
-### Interpreter (Yorumlayıcı)
+## Interpreter (Yorumlayıcı)
 
-- Kodu satır satır çalıştırır.
-- Çalışma anında çeviri yapar.
+- Kodu satır satır çalıştırır
+- Anlık çeviri yapar
 - Örnek: Python
 
-Çalışma modeli:
-
 ```
-Source Code → Interpreter → Execute line by line
+Source Code → Interpreter → Line-by-line execution
 ```
 
-**Avantajı:**  
-- Geliştirme süreci hızlıdır.
-- Dinamik yapı sağlar.
+Avantaj:
+- Geliştirme hızlıdır
+- Esnektir
 
-> Not: Python tamamen interpreter değildir. CPython önce bytecode üretir, ardından Python Virtual Machine (PVM) bu bytecode’u çalıştırır.
+### Önemli Teknik Detay (Mülakat Sorusu Gelir)
+
+Python tamamen interpreter değildir.
+
+CPython çalışma modeli:
+
+```
+Source Code
+↓
+Bytecode (.pyc)
+↓
+Python Virtual Machine (PVM)
+↓
+Execution
+```
 
 ---
 
-## 3️⃣ Syntax vs Semantic
+# 3. Syntax vs Semantic
 
-### Syntax (Sözdizimi)
+## Syntax (Sözdizimi)
 
-Kodun yazım kurallarıdır.
+Yazım kurallarıdır.
 
-Yanlış örnek:
+Yanlış:
 
 ```python
 if x == 5
     print(x)
 ```
 
-Doğru örnek:
+Doğru:
 
 ```python
 if x == 5:
@@ -86,9 +110,9 @@ Syntax hatası varsa program çalışmaz.
 
 ---
 
-### Semantic (Anlam)
+## Semantic (Mantıksal Anlam)
 
-Kod yazım olarak doğru olabilir fakat mantıksal olarak hatalı olabilir.
+Kod yazım olarak doğru olabilir ama mantıksal olarak yanlış olabilir.
 
 ```python
 x = 5
@@ -96,144 +120,133 @@ y = 0
 print(x / y)
 ```
 
-Bu kod syntax olarak doğrudur ancak runtime sırasında `ZeroDivisionError` oluşur.
+Bu runtime hatası üretir.
 
 | Tür | Açıklama |
 |------|----------|
-| Syntax Error | Yazım kuralı hatası |
+| Syntax Error | Yazım hatası |
 | Semantic Error | Mantık hatası |
+| Runtime Error | Çalışma zamanı hatası |
 
 ---
 
-## 4️⃣ Runtime vs Compile Time
+# 4. Compile Time vs Runtime
 
-### Compile Time
+## Compile Time
+- Kod derlenirken oluşur
+- Syntax hataları
+- Statik tip hataları
 
-Kod derlenirken gerçekleşen aşamadır.
+## Runtime
+- Program çalışırken oluşur
+- ZeroDivisionError
+- FileNotFoundError
+- IndexError
 
-Örnek:
-- Syntax hatası
-- Tip uyumsuzluğu (statik dillerde)
-
----
-
-### Runtime
-
-Program çalışırken gerçekleşen aşamadır.
-
-Örnek:
-- Sıfıra bölme
-- Dosya bulunamaması
-- Index out of range
-
-Python dinamik tipli olduğu için çoğu hata runtime sırasında ortaya çıkar.
+Python dinamik tipli olduğu için çoğu hata runtime’da ortaya çıkar.
 
 ---
 
-## 5️⃣ Variable (Değişken) Nedir?
+# 5. Variable (Değişken) Nedir?
 
-Değişken, bellekte bir nesneyi referans eden isimdir.
+Python’da değişken bir "kutu" değildir.
+
+Değişken, bir nesneye referans tutan isimdir.
 
 ```python
 x = 10
 ```
 
-Burada:
-- `10` bir nesnedir (object)
-- `x` bu nesneyi işaret eden referanstır
+- `10` bir object’tir
+- `x` bu object’e referanstır
 
-> Python’da değişken bir "kutu" değildir. Bir etikettir (label).
+> Python’da her şey object’tir.
 
 ---
 
-## 6️⃣ Primitive vs Non-Primitive Types
+# 6. Primitive vs Non-Primitive Types
 
-Python’da teknik olarak her şey object’tir. Ancak genel programlama açısından bu ayrım önemlidir.
+Python’da teknik olarak her şey object’tir.
 
-### Primitive Types
-- Tek değer tutar
-- Genellikle immutable’dır
-- Örnek: `int`, `float`, `bool`
+Ancak kavramsal ayrım önemlidir.
 
-### Non-Primitive (Composite) Types
-- Birden fazla değer tutabilir
+## Primitive (Basit Tipler)
+- Tek değer
+- Genellikle immutable
+- `int`, `float`, `bool`, `str`
+
+## Non-Primitive (Composite)
+- Çoklu veri tutar
 - Veri yapısıdır
-- Örnek: `list`, `dict`, `set`
+- `list`, `dict`, `set`, `tuple`
 
 ---
 
-## 7️⃣ Mutable vs Immutable
+# 7. Mutable vs Immutable
 
-Mülakatların favori konularındandır.
+## Immutable
 
-### Immutable (Değiştirilemez)
-
-Oluşturulduktan sonra değiştirilemez.  
-Değişiklik yapılırsa yeni nesne oluşturulur.
+Oluşturulduktan sonra değiştirilemez.
 
 Örnek:
-- `int`
-- `float`
-- `str`
-- `tuple`
+- int
+- float
+- str
+- tuple
 
 ```python
 x = 5
 x = x + 1
 ```
 
-Burada `5` değişmez. Yeni `6` nesnesi oluşturulur.
+Yeni object oluşturulur.
 
 ---
 
-### Mutable (Değiştirilebilir)
+## Mutable
 
 Aynı nesne üzerinde değişiklik yapılabilir.
 
 Örnek:
-- `list`
-- `dict`
-- `set`
+- list
+- dict
+- set
 
 ```python
 a = [1, 2]
 a.append(3)
 ```
 
-Yeni liste oluşmaz, mevcut liste değişir.
+Yeni liste oluşmaz. Aynı nesne değişir.
 
 ---
 
-## 8️⃣ Stack vs Heap Memory
+# 8. Stack vs Heap Memory
 
-Bellek iki ana alana ayrılır:
+Python bellek modelini anlamak production için kritiktir.
 
-### Stack
+## Stack
+
 - Fonksiyon çağrıları
-- Lokal değişken referansları
-- LIFO (Last In First Out)
+- Lokal referanslar
+- LIFO mantığı
 - Hızlıdır
 
-### Heap
-- Dinamik olarak oluşturulan nesneler
-- Daha büyük bellek alanı
-- Python nesneleri heap üzerinde tutulur
+## Heap
+
+- Tüm Python nesneleri burada tutulur
+- Dinamik bellek alanıdır
+- Daha büyüktür
 
 | Stack | Heap |
 |--------|------|
-| Fonksiyon çağrıları | Nesneler |
-| Hızlı | Görece yavaş |
+| Referanslar | Nesneler |
 | Küçük | Büyük |
+| Hızlı | Görece yavaş |
 
 ---
 
-## 9️⃣ Reference vs Value
-
-### Value Type
-Değer doğrudan kopyalanır.
-
-### Reference Type
-Bellekteki adres kopyalanır.
+# 9. Reference vs Value
 
 Python’da değişkenler nesnelere referans tutar.
 
@@ -242,18 +255,24 @@ a = [1, 2]
 b = a
 ```
 
-`b` yeni liste oluşturmaz.  
-Aynı nesneyi referans eder.
+`b`, yeni liste oluşturmaz.  
+Aynı nesneyi işaret eder.
+
+```python
+b.append(3)
+```
+
+Bu durumda `a` da değişir.
 
 ---
 
-## 🔟 Memory Allocation Temelleri
+# 10. Memory Allocation
 
 Python’da:
 
-- Nesneler heap’te oluşturulur.
-- Referans sayısı tutulur.
-- Referans sayısı 0 olursa nesne silinir.
+- Nesneler heap’te oluşturulur
+- Referans sayısı tutulur
+- Referans 0 olursa nesne silinir
 
 ```python
 a = [1, 2]
@@ -270,41 +289,40 @@ Referans sayısı: 1
 
 ---
 
-## 1️⃣1️⃣ Garbage Collection Nedir?
+# 11. Garbage Collection
 
 Kullanılmayan nesnelerin bellekten temizlenmesidir.
 
 Python iki mekanizma kullanır:
 
 1. Reference Counting
-2. Cycle Detector (döngüsel referansları temizler)
+2. Cycle Detector (circular reference temizler)
 
 ---
 
-## 1️⃣2️⃣ Memory Leak Nedir?
+# 12. Memory Leak
 
-Kullanılmayan fakat referansı devam eden nesnelerin bellekte kalmasıdır.
+Kullanılmayan ama referansı devam eden nesnelerin bellekte kalmasıdır.
 
-Genellikle şu durumlarda oluşur:
+Genellikle:
 
-- Global veri yapıları
+- Global değişkenler
 - Circular reference
 - Yanlış cache kullanımı
 - Uzun yaşayan objeler
 
 ---
 
-## 1️⃣3️⃣ Time Complexity (Big O Notation)
+# 13. Time Complexity (Big-O)
 
-Algoritmanın veri büyüdükçe nasıl davrandığını ölçer.
+Algoritmanın veri büyüdükçe nasıl davrandığını gösterir.
 
-| Notation | Açıklama |
-|----------|----------|
-| O(1) | Sabit zaman |
+| Notation | Anlam |
+|----------|--------|
+| O(1) | Sabit |
 | O(n) | Doğrusal |
 | O(n²) | Karesel |
-
-Örnek:
+| O(log n) | Logaritmik |
 
 ```python
 for i in range(n):
@@ -315,7 +333,7 @@ Bu algoritma O(n)’dir.
 
 ---
 
-## 1️⃣4️⃣ Space Complexity
+# 14. Space Complexity
 
 Algoritmanın kullandığı ek bellek miktarıdır.
 
@@ -330,24 +348,24 @@ Bu fonksiyon O(n) bellek kullanır.
 
 ---
 
-## 1️⃣5️⃣ Algorithm Nedir?
+# 15. Algorithm Nedir?
 
-Bir problemi çözmek için tanımlanmış adımlar bütünüdür.
+Bir problemi çözmek için tanımlı adımlar bütünüdür.
 
 Bir algoritma:
 
-- Sonlu olmalıdır
-- Deterministik olmalıdır
-- Girdi almalıdır
-- Çıktı üretmelidir
+- Sonlu olmalı
+- Deterministik olmalı
+- Girdi almalı
+- Çıktı üretmeli
 
 ---
 
-## 1️⃣6️⃣ Data Structure Nedir?
+# 16. Data Structure Nedir?
 
 Veriyi organize etmek için kullanılan yapılardır.
 
-Örnekler:
+Örnek:
 
 - Array
 - List
@@ -361,12 +379,12 @@ Veriyi organize etmek için kullanılan yapılardır.
 
 ---
 
-## 📌 Bu Bölümün Önemi
+# 📌 Bu Bölüm Neden Kritik?
 
-Bu konular:
+Bu konuları anlamadan:
 
-- GIL’i anlamanı sağlar
-- Django ORM’i anlamanı sağlar
-- QuerySet lazy evaluation mantığını kavratır
-- Production memory problemlerini çözmene yardımcı olur
-- Mülakatta temel eleme aşamasını geçmeni sağlar
+- GIL’i anlayamazsın
+- Django ORM davranışını kavrayamazsın
+- Lazy evaluation mantığını çözemezsin
+- Memory problemlerini debug edemezsin
+- Teknik mülakatta ilk elemeden geçemezsin
