@@ -1,30 +1,45 @@
-# 1.3 Fonksiyonlar (Functions)
+# 1.3 Functions (Fonksiyonlar)
 
-Fonksiyonlar programlamanın temel yapı taşlarından biridir.  
+Fonksiyonlar programlamanın **en önemli soyutlama araçlarından biridir**.
+
 İyi yazılmış fonksiyonlar:
 
-- Tekrar eden kodu soyutlar  
-- Mantığı izole eder  
-- Kod tekrarını azaltır (DRY prensibi)  
-- Test edilebilirliği artırır  
-- Clean Architecture’ın temelini oluşturur  
+- Tekrar eden kodu soyutlar
+- Mantığı izole eder
+- Kod tekrarını azaltır (**DRY – Don't Repeat Yourself**)
+- Test edilebilirliği artırır
+- Büyük projelerde modüler yapı oluşturur
+- Clean Architecture’ın temelini oluşturur
 
-Backend geliştirmede fonksiyon mantığını doğru kurmak, sürdürülebilir ve ölçeklenebilir kod yazmanın anahtarıdır.
+Backend geliştirmede fonksiyon tasarımı doğru yapılmazsa:
+
+- kod karmaşıklaşır
+- test yazmak zorlaşır
+- hatalar artar
+- kod bakımı zorlaşır
 
 ---
 
-## 1️⃣ Function Tanımı
+# 1️⃣ Function Nedir?
 
-Fonksiyon, belirli bir işi yapan ve çağrıldığında çalışan kod bloğudur.
+Fonksiyon, belirli bir işi yapan ve **çağrıldığında çalışan kod bloğudur**.
 
-### Temel Tanım
+Basitçe:
+
+```
+Fonksiyon = tekrar kullanılabilir kod bloğu
+```
+
+---
+
+# Basit Örnek
 
 ```python
 def greet():
     print("Merhaba")
 ```
 
-### Çağırma
+Fonksiyon çağrısı:
 
 ```python
 greet()
@@ -38,14 +53,57 @@ Merhaba
 
 ---
 
-## 2️⃣ return Nedir?
+# Fonksiyon Neden Kullanılır?
 
-Fonksiyon bir değer döndürmek istiyorsa `return` kullanılır.
+Fonksiyonlar şu problemleri çözer:
+
+### 1️⃣ Kod tekrarını azaltır
+
+Kötü kod:
+
+```python
+print("Hoşgeldiniz Ali")
+print("Hoşgeldiniz Ayşe")
+print("Hoşgeldiniz Mehmet")
+```
+
+Fonksiyon ile:
+
+```python
+def greet(name):
+    print("Hoşgeldiniz", name)
+
+greet("Ali")
+greet("Ayşe")
+greet("Mehmet")
+```
+
+---
+
+### 2️⃣ Kod okunabilirliğini artırır
+
+```python
+process_payment()
+send_email()
+create_invoice()
+```
+
+Bu fonksiyon isimleri kodun ne yaptığını açıklar.
+
+---
+
+# 2️⃣ return Nedir?
+
+Fonksiyon bir değer üretmek istiyorsa **return kullanılır**.
 
 ```python
 def add(a, b):
     return a + b
+```
 
+Fonksiyon çağrısı:
+
+```python
 result = add(3, 5)
 print(result)
 ```
@@ -56,47 +114,123 @@ print(result)
 8
 ```
 
-### Önemli Noktalar
+---
 
-- `return` fonksiyonu **anında sonlandırır**.
-- `return` yoksa fonksiyon varsayılan olarak `None` döner.
+# return Nasıl Çalışır?
+
+`return` iki şey yapar:
+
+1️⃣ Fonksiyonu **hemen sonlandırır**  
+2️⃣ Bir değer döndürür
+
+Örnek:
+
+```python
+def test():
+
+    print("Başladı")
+
+    return 5
+
+    print("Burası çalışmaz")
+```
+
+Çıktı:
+
+```
+Başladı
+```
+
+---
+
+# return Olmazsa Ne Olur?
+
+Python varsayılan olarak `None` döndürür.
 
 ```python
 def test():
     pass
 
-print(test())  # None
+print(test())
+```
+
+Çıktı:
+
+```
+None
 ```
 
 ---
 
-## 3️⃣ Function Parameters
+# return vs print
 
-Fonksiyonun aldığı girdilere **parametre (parameter)** denir.
+Yeni başlayanların sık yaptığı hata.
+
+### print
+
+Sadece ekrana yazar.
+
+```python
+def add(a, b):
+    print(a + b)
+```
+
+### return
+
+Değer üretir.
+
+```python
+def add(a, b):
+    return a + b
+```
+
+Return kullanmazsak:
+
+```python
+result = add(3,5)
+```
+
+result:
+
+```
+None
+```
+
+---
+
+# 3️⃣ Parameters ve Arguments
+
+Bu iki kavram genelde karıştırılır.
+
+### Parameter
+
+Fonksiyon tanımındaki değişken.
 
 ```python
 def greet(name):
-    print("Merhaba", name)
 ```
 
-Burada `name` parametredir.
-
-### Parametre Türleri
-
-Python’da farklı parametre türleri vardır:
-
-- Positional arguments
-- Keyword arguments
-- Default parameters
-- Variable length arguments (`*args`, `**kwargs`)
+`name` → parameter
 
 ---
 
-## 4️⃣ Positional vs Keyword Arguments
+### Argument
 
-### Positional Argument
+Fonksiyon çağrılırken verilen değer.
 
-Parametreler sıraya göre gönderilir.
+```python
+greet("Ali")
+```
+
+`"Ali"` → argument
+
+---
+
+# 4️⃣ Positional vs Keyword Arguments
+
+## Positional Argument
+
+Sırasına göre eşleşir.
 
 ```python
 def divide(a, b):
@@ -105,16 +239,18 @@ def divide(a, b):
 divide(10, 2)
 ```
 
-Burada:
+Eşleşme:
 
-- `a = 10`
-- `b = 2`
+```
+a = 10
+b = 2
+```
 
 ---
 
-### Keyword Argument
+## Keyword Argument
 
-Parametre adı belirtilerek gönderilir.
+Parametre adı belirtilir.
 
 ```python
 divide(a=10, b=2)
@@ -122,36 +258,43 @@ divide(a=10, b=2)
 
 Avantajları:
 
-- Okunabilirlik artar
-- Parametre sırası önemli olmaz
+- daha okunabilir
+- parametre sırası önemli değildir
 
 ---
 
-### Karışık Kullanım
+## Karışık Kullanım
 
 ```python
 divide(10, b=2)
 ```
 
-Ancak şu kullanım hatalıdır:
+Ama şu kullanım hatalıdır:
 
 ```python
-divide(a=10, 2)  # SyntaxError
+divide(a=10, 2)
 ```
 
-Kural:  
-**Keyword argument’tan sonra positional argument kullanılamaz.**
+Sebep:
+
+```
+Keyword argument'tan sonra positional argument kullanılamaz
+```
 
 ---
 
-## 5️⃣ Default Parameters
+# 5️⃣ Default Parameters
 
-Parametreye varsayılan değer verilebilir.
+Parametrelere varsayılan değer verilebilir.
 
 ```python
 def greet(name="Misafir"):
     print("Merhaba", name)
+```
 
+Çağrı:
+
+```python
 greet()
 ```
 
@@ -163,15 +306,25 @@ Merhaba Misafir
 
 ---
 
-## 6️⃣ Mutable Default Parameter Problemi (Mülakat Favorisi)
+# 6️⃣ Mutable Default Parameter Problemi
 
-### Problemli Kod
+Python mülakatlarının klasik sorusudur.
+
+---
+
+## Problem
 
 ```python
 def add_item(item, my_list=[]):
-    my_list.append(item)
-    return my_list
 
+    my_list.append(item)
+
+    return my_list
+```
+
+Çağrı:
+
+```python
 print(add_item(1))
 print(add_item(2))
 ```
@@ -187,147 +340,200 @@ Gerçek:
 
 ```
 [1]
-[1, 2]
+[1,2]
 ```
 
-### Neden Böyle?
+---
 
-Python default parametreleri **fonksiyon tanımlanırken** oluşturur, her çağrıldığında değil.
+# Neden Böyle Olur?
 
-Yani:
+Python default parametreleri:
 
-```python
+```
+fonksiyon tanımlanırken oluşturur
+```
+
+yani:
+
+```
 my_list = []
 ```
 
-sadece bir kez oluşturulur ve tüm çağrılar aynı listeyi kullanır.
+sadece **bir kez oluşturulur**.
 
 ---
 
-### Doğru Kullanım
+# Doğru Çözüm
 
 ```python
 def add_item(item, my_list=None):
+
     if my_list is None:
         my_list = []
+
     my_list.append(item)
+
     return my_list
 ```
 
-Bu yöntem her çağrıda yeni liste oluşturur.
+Bu yaklaşım **her çağrıda yeni liste oluşturur**.
 
 ---
 
-## 7️⃣ *args ve **kwargs
+# 7️⃣ *args ve **kwargs
 
-Fonksiyonun değişken sayıda parametre almasını sağlar.
+Fonksiyonun **değişken sayıda parametre almasını sağlar**.
 
 ---
 
-### *args
+# *args
 
 Tuple olarak gelir.
 
 ```python
 def sum_all(*args):
+
     return sum(args)
-
-print(sum_all(1, 2, 3, 4))
 ```
 
-`args` değeri:
+Çağrı:
+
+```python
+sum_all(1,2,3,4)
+```
+
+args değeri:
 
 ```
-(1, 2, 3, 4)
+(1,2,3,4)
 ```
 
 ---
 
-### **kwargs
+# **kwargs
 
 Dictionary olarak gelir.
 
 ```python
 def print_info(**kwargs):
-    print(kwargs)
 
+    print(kwargs)
+```
+
+Çağrı:
+
+```python
 print_info(name="Ali", age=25)
 ```
 
-`kwargs`:
+kwargs:
 
-```python
+```
 {"name": "Ali", "age": 25}
 ```
 
 ---
 
-### Gerçek Backend Örneği
+# Backend Gerçek Kullanım
 
-Django serializer kullanım mantığı:
+Django ORM:
 
 ```python
-def create_user(**validated_data):
-    return User.objects.create(**validated_data)
+User.objects.create(**data)
+```
+
+data:
+
+```
+{
+"name":"Ali",
+"age":25
+}
 ```
 
 ---
 
-## 8️⃣ Recursion (Özyineleme)
+# 8️⃣ Recursion (Özyineleme)
 
-Fonksiyonun kendini çağırmasıdır.
+Fonksiyonun **kendini çağırmasıdır**.
 
-### Örnek: Faktöriyel
+---
+
+# Faktöriyel Örneği
 
 ```python
 def factorial(n):
+
     if n == 1:
         return 1
-    return n * factorial(n - 1)
+
+    return n * factorial(n-1)
 ```
 
-Çalışma akışı:
+Çalışma:
 
 ```
 factorial(3)
-→ 3 * factorial(2)
-→ 3 * (2 * factorial(1))
-→ 3 * (2 * 1)
-→ 6
+
+3 * factorial(2)
+
+3 * (2 * factorial(1))
+
+3 * (2 * 1)
+
+6
 ```
-
-### Kritik Noktalar
-
-- Mutlaka bir **base case** olmalıdır.
-- Aksi halde sonsuz recursion oluşur.
-- Python’da recursion derinlik limiti vardır (`RecursionError`).
-
-### Backend Gerçek Kullanım
-
-- Tree yapıları
-- Nested yorum sistemi
-- Dosya sistemi tarama
-- Graph traversal
 
 ---
 
-## 9️⃣ Pure Function
+# Recursion İçin 2 Kural
+
+1️⃣ Base case olmalı  
+2️⃣ Problem küçülmeli
+
+---
+
+# Recursion Nerelerde Kullanılır?
+
+- Tree traversal
+- Graph traversal
+- Nested yorum sistemi
+- Dosya sistemi tarama
+
+---
+
+# Recursion Riskleri
+
+- Stack overflow
+- Recursion depth limit
+
+Python default limit:
+
+```
+~1000
+```
+
+---
+
+# 9️⃣ Pure Function
 
 Pure function iki özelliğe sahiptir:
 
-1. Aynı input → her zaman aynı output  
-2. Dış dünyayı etkilemez (side effect yoktur)
+1️⃣ Aynı input → aynı output  
+2️⃣ Side effect yoktur
 
-### Pure Örnek
+---
+
+# Pure Function Örneği
 
 ```python
-def add(a, b):
-    return a + b
+def add(a,b):
+    return a+b
 ```
 
 ---
 
-### Pure Olmayan Örnek
+# Pure Olmayan Fonksiyon
 
 ```python
 x = 10
@@ -340,105 +546,127 @@ Global değişken kullanıldığı için pure değildir.
 
 ---
 
-## 🔟 Side Effects
+# 🔟 Side Effects
 
 Fonksiyonun dış dünyayı değiştirmesidir.
 
-### Side Effect Örnekleri
+Örnekler:
 
-- Global değişken değiştirmek
-- Dosyaya yazmak
-- Veritabanına kayıt atmak
-- Email göndermek
-- Cache yazmak
-- Print etmek
+- dosya yazma
+- database kayıt
+- email gönderme
+- global değişken değiştirme
+- print
 
 ```python
 def add_item(lst):
+
     lst.append(5)
 ```
 
-Bu pure değildir çünkü dış listeyi değiştirir.
-
-Backend’te:
-
-- DB update → side effect
-- Email gönderme → side effect
-- Log yazma → side effect
+Bu fonksiyon dış listeyi değiştirir.
 
 ---
 
-## 1️⃣1️⃣ First Class Functions
+# Backend Side Effect Örnekleri
 
-Python’da fonksiyonlar bir nesnedir.
+- DB update
+- Email gönderme
+- Cache yazma
+- Log yazma
+
+---
+
+# 1️⃣1️⃣ First Class Functions
+
+Python'da fonksiyonlar **nesne gibi davranır**.
 
 Yani:
 
-- Değişkene atanabilir
-- Parametre olarak gönderilebilir
-- Başka fonksiyondan döndürülebilir
+- değişkene atanabilir
+- parametre olabilir
+- başka fonksiyondan dönebilir
 
 ---
 
-### Fonksiyonu Değişkene Atama
+# Fonksiyon Atama
 
 ```python
 def greet():
     return "Merhaba"
 
 hello = greet
+
 print(hello())
 ```
 
 ---
 
-### Fonksiyon Parametre Olarak
+# Fonksiyon Parametre Olarak
 
 ```python
 def operate(func, a, b):
-    return func(a, b)
 
-def add(a, b):
-    return a + b
-
-print(operate(add, 3, 4))
+    return func(a,b)
 ```
 
 ---
 
-### Fonksiyon Döndürme
+```python
+def add(a,b):
+
+    return a+b
+```
+
+---
+
+```python
+operate(add,3,4)
+```
+
+---
+
+# Fonksiyon Döndürme
 
 ```python
 def outer():
+
     def inner():
         return "Hello"
+
     return inner
 ```
 
 ---
 
-## Backend Açısından Önemi
+# Backend Açısından Önemi
 
-Bu konuları bilmeden:
+Fonksiyon mantığını anlamadan şu konular zor anlaşılır:
 
-- Decorator anlayamazsın
-- Django signal mantığını kavrayamazsın
-- Middleware yazamazsın
-- Clean architecture kuramazsın
-- Test edilebilir kod yazamazsın
+- Decorators
+- Django middleware
+- Signals
+- Dependency injection
+- Clean architecture
 
-Fonksiyon tasarımı, backend geliştirmenin kalbidir.
+Fonksiyon tasarımı backend geliştirmenin **temelidir**.
 
 ---
 
-## 🎯 Mülakat Seviyesi Sorular
+# 🎯 Mülakat Soruları
+
+Sık sorulanlar:
 
 - Mutable default parametre neden tehlikelidir?
+- `return` ile `print` farkı nedir?
 - Pure function nedir?
 - Recursion riskleri nelerdir?
 - `*args` ve `**kwargs` farkı nedir?
-- Function first class ne demektir?
-- `return` ile `print` arasındaki fark nedir?
-- Side effect nedir ve neden test edilebilirliği zorlaştırır?
+- First class function nedir?
+- Side effect nedir?
 
 ---
+
+# Tek Cümlelik Mülakat Tanımı
+
+Fonksiyon, belirli bir işi yapan ve çağrıldığında çalışan tekrar kullanılabilir kod bloğudur.
