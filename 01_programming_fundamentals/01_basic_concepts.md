@@ -1,692 +1,711 @@
-# 16️⃣ Data Structure (Veri Yapısı) Nedir?
+# BÖLÜM 1 — BASIC CONCEPTS (Temel Programlama ve Python Kavramları)
 
-Data Structure (Veri Yapısı), verilerin bilgisayar belleğinde **nasıl organize edildiğini, nasıl saklandığını ve nasıl erişildiğini** tanımlayan yapılardır.
+Bu bölüm programlamanın temelini oluşturur.
 
-Bir program yazarken çoğu zaman problem şu olur:
+Bu bölümde öğrenilecek konular:
 
-- veriyi nereye koyacağız?
-- veriye nasıl ulaşacağız?
-- veriyi nasıl değiştireceğiz?
+- Programlama mantığı
+- Python’ın çalışma modeli
+- Bellek yönetimi
+- Değişken ve referans sistemi
+- Algoritmik düşünme
+- Zaman ve bellek karmaşıklığı
 
-İşte bu soruların cevabını **veri yapıları** verir.
+Bu konular:
 
----
-
-# Basit Tanım
-
-Data Structure =
-
-```
-Verinin düzeni + veriye erişim yöntemi
-```
+- Python mülakatlarının büyük kısmında sorulur
+- Backend geliştirmenin temelini oluşturur
+- Performans problemlerini anlamayı sağlar
 
 ---
 
-# Veri Yapısı Neden Önemlidir?
+# 1️⃣ Programlama Nedir?
 
-Aynı problemi farklı veri yapıları ile çözmek **performansı dramatik şekilde değiştirebilir**.
+Programlama, bir problemi çözmek için bilgisayara **adım adım talimatlar vermektir**.
 
-Örneğin:
+Bilgisayarlar yalnızca **makine dili** anlar.
 
-100 milyon elemanlı veri düşün.
+Makine dili:
 
-| Yapı | Arama Süresi |
-|-----|--------------|
-| List | çok yavaş |
-| Set | çok hızlı |
+```
+010101010101
+```
 
-Sebebi veri yapılarının **farklı algoritmalar kullanmasıdır**.
+İnsanların bu şekilde yazması çok zor olduğu için **yüksek seviyeli diller** kullanılır.
+
+Örnek:
+
+- Python
+- Java
+- C
+- C++
+- Go
+- JavaScript
+
+Bu diller daha sonra **makine diline çevrilir**.
+
+---
+
+# Programlama Süreci
+
+Bir yazılım geliştirme süreci genelde şu adımlardan oluşur:
+
+1️⃣ Problemi anlamak  
+2️⃣ Algoritma tasarlamak  
+3️⃣ Kod yazmak  
+4️⃣ Test etmek  
+5️⃣ Hataları düzeltmek  
+
+Basit formül:
+
+```
+Programlama = Problem çözme + Algoritma + Kod
+```
 
 ---
 
 # Gerçek Hayat Analojisi
 
-Bir kütüphane düşün.
-
-## Kötü organizasyon
-
-Kitaplar rastgele yere konulmuş.
-
-Bir kitabı bulmak için:
+Bir yemek tarifi düşün.
 
 ```
-1. raf
-2. raf
-3. raf
-...
+1. Tavayı ısıt
+2. Yağ ekle
+3. Yumurtayı kır
+4. Karıştır
 ```
 
-Hepsini aramak gerekir.
+Bu aslında bir **algoritmadır**.
 
-Bu:
-
-```
-O(n)
-```
-
-yani **linear search**.
+Bilgisayar programları da aynı mantıkla çalışır.
 
 ---
 
-## İyi organizasyon
+# 2️⃣ Compiler vs Interpreter
 
-Kitaplar kategorilere ayrılmış.
+Kodun çalışabilmesi için **makine diline çevrilmesi gerekir**.
 
-```
-Tarih
-Bilim
-Roman
-```
-
-Bir kitabı çok hızlı bulabilirsin.
-
-Bu da **iyi veri yapısıdır**.
+Bu çeviriyi yapan iki sistem vardır.
 
 ---
 
-# Veri Yapılarının Temel Amacı
+# Compiler (Derleyici)
 
-3 şey:
+Compiler tüm programı **tek seferde çevirir**.
+
+Çalışma modeli:
 
 ```
-1️⃣ Veriyi saklamak
-2️⃣ Veriye hızlı erişmek
-3️⃣ Veriyi verimli değiştirmek
+Source Code → Compiler → Executable → Run
 ```
+
+Örnek diller:
+
+- C
+- C++
+- Rust
+- Go
+
+Avantajları:
+
+- Çok hızlı çalışır
+- Optimize edilmiş kod üretir
+
+Dezavantajları:
+
+- Küçük hata bile tüm derlemeyi durdurur
 
 ---
 
-# Python'daki Temel Veri Yapıları
+# Interpreter (Yorumlayıcı)
 
-Python’da en sık kullanılan veri yapıları:
+Interpreter kodu **satır satır çalıştırır**.
 
-| Veri Yapısı | Açıklama |
-|---|---|
-| List | sıralı veri koleksiyonu |
-| Tuple | değiştirilemez liste |
-| Set | tekrarsız veri |
-| Dict | anahtar-değer veri |
-
----
-
-# 1️⃣ List
-
-List, Python’daki en yaygın veri yapısıdır.
-
-Tanım:
-
-> Sıralı ve değiştirilebilir veri koleksiyonu.
-
----
-
-## Örnek
-
-```python
-numbers = [10, 20, 30, 40]
-```
-
-Bellekte:
+Çalışma modeli:
 
 ```
-index   value
-0       10
-1       20
-2       30
-3       40
+Source Code → Interpreter → Execute
 ```
-
----
-
-# Index ile Erişim
-
-```python
-numbers[0]
-```
-
-Sonuç:
-
-```
-10
-```
-
----
-
-# Eleman Ekleme
-
-```python
-numbers.append(50)
-```
-
-Sonuç:
-
-```
-[10,20,30,40,50]
-```
-
----
-
-# Eleman Silme
-
-```python
-numbers.pop()
-```
-
----
-
-# List Özellikleri
-
-| Özellik | Açıklama |
-|---|---|
-| sıralıdır | index vardır |
-| değiştirilebilir | mutable |
-| duplicate olabilir | aynı değer tekrar edebilir |
-
----
-
-# List Complexity
-
-| İşlem | Complexity |
-|---|---|
-| index erişim | O(1) |
-| append | O(1) amortized |
-| arama | O(n) |
-
----
-
-# Neden Arama O(n)?
-
-Çünkü Python tek tek kontrol eder.
-
-```
-10
-20
-30
-40
-```
-
-Aranan değer:
-
-```
-40
-```
-
-Python sırasıyla bakar.
-
----
-
-# List Internal Yapısı
-
-Python list aslında:
-
-```
-dynamic array
-```
-
-yani boyutu otomatik büyüyen bir dizidir.
-
-Örneğin:
-
-```
-capacity = 4
-```
-
-Liste dolunca:
-
-```
-capacity = 8
-```
-
-yapılır.
-
-Bu yüzden append genelde hızlıdır.
-
----
-
-# 2️⃣ Tuple
-
-Tuple, listeye benzer ama **immutable'dır**.
-
-Tanım:
-
-> Değiştirilemeyen sıralı veri yapısı.
-
----
-
-# Örnek
-
-```python
-point = (10, 20)
-```
-
----
-
-# Erişim
-
-```python
-point[0]
-```
-
-Sonuç:
-
-```
-10
-```
-
----
-
-# Tuple Değiştirilebilir mi?
-
-Hayır.
-
-```python
-point[0] = 30
-```
-
-Hata verir.
-
----
-
-# Tuple Avantajları
-
-- daha hızlı
-- daha az bellek kullanır
-- immutable olduğu için güvenlidir
-
----
-
-# Tuple Ne Zaman Kullanılır?
-
-Eğer veri **değişmeyecekse**.
 
 Örnek:
 
+- Python
+- JavaScript
+- Ruby
+
+Avantajları:
+
+- Geliştirme hızlıdır
+- Test etmek kolaydır
+
+Dezavantajları:
+
+- Genelde daha yavaştır
+
+---
+
+# Python Gerçekte Nasıl Çalışır?
+
+Python tamamen interpreter değildir.
+
+CPython çalışma modeli:
+
 ```
-koordinatlar
-RGB renk
-database record
+Python Source Code (.py)
+↓
+Bytecode (.pyc)
+↓
+Python Virtual Machine (PVM)
+↓
+Execution
+```
+
+Yani:
+
+```
+Python = Bytecode + Virtual Machine
 ```
 
 ---
 
-# Tuple Hashable Olabilir
+# 3️⃣ Syntax vs Semantic
 
-Bu yüzden dictionary key olabilir.
+Programlama dillerinde iki tür hata vardır.
+
+---
+
+# Syntax (Sözdizimi)
+
+Dil kurallarına uymayan yazım hatalarıdır.
+
+Yanlış:
 
 ```python
-d = {(1,2): "point"}
+if x == 5
+    print(x)
 ```
 
----
-
-# 3️⃣ Set
-
-Set, tekrarsız veri yapısıdır.
-
-Tanım:
-
-> Unique elemanlardan oluşan koleksiyon.
-
----
-
-# Örnek
+Doğru:
 
 ```python
-nums = {1,2,3,4}
+if x == 5:
+    print(x)
 ```
+
+Syntax hatası varsa program **çalışmaz**.
 
 ---
 
-# Duplicate Eklenirse
+# Semantic (Mantık Hatası)
+
+Kod yazım olarak doğru olabilir ama mantık yanlış olabilir.
 
 ```python
-nums = {1,2,2,3}
+price = 100
+discount = 200
+
+final = price - discount
 ```
 
-Sonuç:
-
-```
-{1,2,3}
-```
+Kod çalışır ama sonuç mantıksızdır.
 
 ---
 
-# Set Özellikleri
+# Runtime Error
 
-| Özellik | Açıklama |
-|---|---|
-| duplicate yok | unique |
-| sıralı değil | unordered |
-| çok hızlı arama | hash table |
-
----
-
-# Eleman Ekleme
+Program çalışırken oluşan hatalardır.
 
 ```python
-nums.add(5)
+x = 10
+y = 0
+
+print(x / y)
+```
+
+Hata:
+
+```
+ZeroDivisionError
 ```
 
 ---
 
-# Set Complexity
+# Hata Türleri
 
-| İşlem | Complexity |
-|---|---|
-| arama | O(1) |
-| ekleme | O(1) |
-| silme | O(1) |
-
----
-
-# Set Neden Bu Kadar Hızlı?
-
-Çünkü **hash table kullanır**.
+| Tür | Açıklama |
+|----|----|
+| Syntax Error | Yazım hatası |
+| Semantic Error | Mantık hatası |
+| Runtime Error | Çalışma zamanı hatası |
 
 ---
 
-# Hash Table Basit Mantık
-
-Bir değer alınır:
-
-```
-"Ali"
-```
-
-hash fonksiyonu çalışır:
-
-```
-hash("Ali") → 72391
-```
-
-Bu sayı bir index'e dönüştürülür.
-
-Bu yüzden arama çok hızlıdır.
+# 4️⃣ Compile Time vs Runtime
 
 ---
 
-# 4️⃣ Dictionary
+# Compile Time
 
-Dictionary Python’un en güçlü veri yapılarından biridir.
+Kod derlenirken oluşan hatalardır.
 
-Tanım:
+Örnek:
 
-> Anahtar-değer (key-value) veri yapısı.
+- Syntax hataları
+- Tip hataları (statik dillerde)
 
 ---
 
-# Örnek
+# Runtime
+
+Program çalışırken oluşan hatalardır.
+
+Örnek:
+
+- ZeroDivisionError
+- FileNotFoundError
+- IndexError
+
+Python dinamik tipli olduğu için çoğu hata **runtime’da ortaya çıkar**.
+
+---
+
+# 5️⃣ Variable (Değişken) Nedir?
+
+Çoğu kişi değişkeni **kutu** gibi düşünür.
+
+Ama Python'da durum farklıdır.
+
+Python'da değişken:
+
+```
+Bir nesneye referans tutan isimdir
+```
+
+Örnek:
 
 ```python
-user = {
-    "name": "Ali",
-    "age": 25
-}
+x = 10
+```
+
+Burada:
+
+```
+10 → object
+x → referans
 ```
 
 ---
 
-# Erişim
+# Python'da Her Şey Object'tir
+
+Python'da şu değerlerin hepsi object'tir:
+
+- int
+- float
+- string
+- list
+- dict
+- function
+- class
+
+---
+
+# 6️⃣ Primitive vs Non-Primitive Types
+
+Python’da teknik olarak her şey object olsa da kavramsal ayrım yapılır.
+
+---
+
+# Primitive Types
+
+Tek bir değer tutar.
+
+Örnek:
+
+- int
+- float
+- bool
+- str
+
+---
+
+# Non-Primitive Types
+
+Birden fazla veri tutar.
+
+Örnek:
+
+- list
+- dict
+- set
+- tuple
+
+---
+
+# 7️⃣ Mutable vs Immutable
+
+Bu Python'daki en kritik kavramlardan biridir.
+
+---
+
+# Immutable
+
+Oluşturulduktan sonra değiştirilemez.
+
+Örnek:
+
+- int
+- float
+- str
+- tuple
 
 ```python
-user["name"]
+x = 5
+x = x + 1
 ```
 
-Sonuç:
-
-```
-Ali
-```
+Burada yeni object oluşur.
 
 ---
 
-# Yeni Veri Eklemek
+# Mutable
+
+Aynı nesne değiştirilebilir.
+
+Örnek:
+
+- list
+- dict
+- set
 
 ```python
-user["city"] = "Istanbul"
+a = [1,2]
+a.append(3)
 ```
+
+Aynı liste değişir.
 
 ---
 
-# Dictionary Özellikleri
+# Mutable vs Immutable Farkı
 
-| Özellik | Açıklama |
-|---|---|
-| key-value | veri eşlemesi |
-| hızlı erişim | O(1) |
-| hash table kullanır | |
-
----
-
-# Dictionary Complexity
-
-| İşlem | Complexity |
-|---|---|
-| erişim | O(1) |
-| ekleme | O(1) |
-| silme | O(1) |
+| Tür | Özellik |
+|----|----|
+| Immutable | değiştirilemez |
+| Mutable | değiştirilebilir |
 
 ---
 
-# List vs Set Arama Karşılaştırması
+# 8️⃣ Stack vs Heap Memory
 
----
-
-## List Arama
-
-```python
-if x in my_list:
-```
-
-Python tek tek bakar.
-
-```
-O(n)
-```
-
----
-
-## Set Arama
-
-```python
-if x in my_set:
-```
-
-Hash table kullanır.
-
-```
-O(1)
-```
-
----
-
-# Büyük Veri Örneği
-
-10 milyon veri düşün.
-
-| Yapı | Arama |
-|---|---|
-| List | 10 milyon kontrol |
-| Set | 1 kontrol |
-
-Bu yüzden veri yapısı seçimi kritiktir.
-
----
-
-# Python Built-in Dışındaki Veri Yapıları
+Python'da bellek iki ana bölümden oluşur.
 
 ---
 
 # Stack
 
-Stack:
+Stack şu şeyleri tutar:
 
-```
-LIFO
-Last In First Out
-```
+- fonksiyon çağrıları
+- lokal değişken referansları
 
-Gerçek hayat:
+Özellikleri:
 
-```
-tabak yığını
-```
-
-Son koyduğun tabak ilk çıkar.
-
----
-
-# Queue
-
-Queue:
-
-```
-FIFO
-First In First Out
-```
-
-Gerçek hayat:
-
-```
-banka kuyruğu
-```
-
----
-
-# Linked List
-
-Linked list:
-
-```
-node → node → node
-```
-
-Her eleman bir sonrakini gösterir.
-
-Avantaj:
-
-```
-ekleme hızlı
-```
-
----
-
-# Tree
-
-Tree hiyerarşik veri yapısıdır.
-
-```
-        root
-       /    \
-     node   node
-```
-
-Kullanım:
-
-```
-file system
-database index
-```
-
----
-
-# Graph
-
-Graph bağlantılı veri yapısıdır.
-
-```
-A ---- B
- \    /
-   C
-```
-
-Kullanım:
-
-```
-social network
-navigation
-```
+- küçük
+- hızlı
+- LIFO (Last In First Out)
 
 ---
 
 # Heap
 
-Heap özel bir ağaç yapısıdır.
+Heap şu şeyleri tutar:
 
-Kullanım:
+- tüm Python nesneleri
+
+Özellikleri:
+
+- büyük
+- dinamik
+- daha yavaş
+
+---
+
+# Stack vs Heap
+
+| Stack | Heap |
+|------|------|
+| Referanslar | Nesneler |
+| Küçük | Büyük |
+| Hızlı | Daha yavaş |
+
+---
+
+# 9️⃣ Reference vs Value
+
+Python referans tabanlı çalışır.
+
+Örnek:
+
+```python
+a = [1,2]
+b = a
+```
+
+Bellekte:
 
 ```
-priority queue
-task scheduler
+a → list
+b → aynı list
 ```
 
 ---
 
-# En Önemli Mülakat Sorusu
+```python
+b.append(3)
+```
 
-Bir developer’dan beklenen şey:
+Sonuç:
 
-> Doğru veri yapısını seçebilmek.
+```
+a = [1,2,3]
+b = [1,2,3]
+```
+
+Çünkü aynı nesneyi gösterirler.
 
 ---
 
-# Örnek
+# 10️⃣ Memory Allocation
 
-Problem:
+Python'da nesneler **heap memory'de oluşturulur**.
 
-```
-hızlı arama
-```
+Referans sayısı tutulur.
 
-Çözüm:
+Örnek:
 
-```
-set
+```python
+a = [1,2]
 ```
 
----
-
-Problem:
+Referans sayısı:
 
 ```
-key-value mapping
-```
-
-Çözüm:
-
-```
-dict
+1
 ```
 
 ---
 
-Problem:
-
-```
-sıralı veri
+```python
+b = a
 ```
 
-Çözüm:
+Referans sayısı:
 
 ```
-list
+2
 ```
 
 ---
 
-Problem:
-
-```
-unique veri
+```python
+del a
 ```
 
-Çözüm:
+Referans sayısı:
 
 ```
-set
+1
+```
+
+Referans sayısı **0 olursa nesne silinir**.
+
+---
+
+# 11️⃣ Garbage Collection
+
+Garbage collection kullanılmayan nesneleri temizler.
+
+Python iki sistem kullanır.
+
+---
+
+# Reference Counting
+
+Her nesnenin referans sayısı tutulur.
+
+Referans sayısı 0 olunca:
+
+```
+object silinir
 ```
 
 ---
 
-# Tek Cümlelik Mülakat Tanımı
+# Cycle Detector
 
-Data structure, verilerin bellekte organize edilmesini ve veriye verimli erişilmesini sağlayan yapılardır.
+Bazı durumlarda referans sayısı 0 olmaz.
+
+Örnek:
+
+```
+A → B
+B → A
+```
+
+Bu circular reference oluşturur.
+
+Python'un cycle detector sistemi bunu temizler.
+
+---
+
+# 12️⃣ Memory Leak
+
+Kullanılmayan ama referansı devam eden nesnelerin bellekte kalmasıdır.
+
+Sebep olabilecek durumlar:
+
+- global değişkenler
+- circular references
+- yanlış cache kullanımı
+- büyük veri yapıları
+
+---
+
+# 13️⃣ Time Complexity (Big-O)
+
+Bir algoritmanın veri büyüdükçe nasıl davrandığını gösterir.
+
+---
+
+# O(1)
+
+Sabit zaman.
+
+```python
+arr[0]
+```
+
+---
+
+# O(n)
+
+Doğrusal zaman.
+
+```python
+for i in arr:
+    print(i)
+```
+
+---
+
+# O(n²)
+
+Karesel zaman.
+
+```python
+for i in arr:
+    for j in arr:
+        print(i,j)
+```
+
+---
+
+# O(log n)
+
+Logaritmik zaman.
+
+Genellikle binary search algoritmasında görülür.
+
+---
+
+# Complexity Tablosu
+
+| Complexity | Anlam |
+|----|----|
+| O(1) | sabit |
+| O(log n) | logaritmik |
+| O(n) | doğrusal |
+| O(n²) | karesel |
+
+---
+
+# 14️⃣ Space Complexity
+
+Bir algoritmanın kullandığı **ek bellek miktarıdır**.
+
+```python
+def foo(n):
+
+    arr = []
+
+    for i in range(n):
+        arr.append(i)
+```
+
+Bellek kullanımı:
+
+```
+O(n)
+```
+
+---
+
+# 15️⃣ Algorithm Nedir?
+
+Bir problemi çözmek için tanımlı adımlar bütünüdür.
+
+Bir algoritma:
+
+- sonlu olmalıdır
+- belirli olmalıdır
+- girdi almalıdır
+- çıktı üretmelidir
+
+---
+
+# Basit Algoritma Örneği
+
+Bir sayının çift olup olmadığını kontrol et.
+
+```
+1. sayıyı al
+2. 2'ye böl
+3. kalan 0 ise çift
+```
+
+Kod:
+
+```python
+if n % 2 == 0:
+    print("Çift")
+```
+
+---
+
+# 16️⃣ Data Structure Nedir?
+
+Verilerin bellekte organize edilme biçimidir.
+
+Örnek veri yapıları:
+
+- Array
+- List
+- Stack
+- Queue
+- Hash Table
+- Tree
+- Graph
+
+Doğru veri yapısı seçimi performansı ciddi şekilde etkiler.
+
+---
+
+# Bu Bölüm Neden Kritik?
+
+Bu konular anlaşılmadan:
+
+- Python memory modeli anlaşılmaz
+- Django ORM davranışı anlaşılmaz
+- performans problemleri çözülemez
+- teknik mülakatlarda zorlanılır
